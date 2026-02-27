@@ -7,6 +7,7 @@ import AppSidebar from "./Partials/AppSidebar.vue";
 import AppFooter from "./Partials/AppFooter.vue";
 import SystemToast from "./Partials/SystemToast.vue";
 import ConfirmDialog from "@/Components/ConfirmDialog.vue";
+import UndoToast from "@/Components/UndoToast.vue";
 
 defineProps({
     title: String,
@@ -23,6 +24,7 @@ const isSidebarOpen = ref(false);
 
         <SystemToast />
         <ConfirmDialog />
+        <UndoToast />
         <div
             class="min-h-screen bg-background text-text-main flex flex-col transition-colors duration-300"
         >

@@ -7,12 +7,14 @@ use App\Models\File;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
+
+
 class FileManagerController extends Controller
 {
     public function index()
     {
         $files = File::with('media')->latest()->paginate(24);
-        
+
         $files->getCollection()->transform(function ($file) {
             $media = $file->getFirstMedia('default');
             return [
@@ -57,10 +59,14 @@ class FileManagerController extends Controller
         return redirect()->route('admin.files.index')->with('success', 'Files uploaded successfully.');
     }
 
-    public function destroy(File $file)
+    public function destroy(int $id)
     {
-        $file->delete();
-        return back()->with('success', 'File deleted.');
+        $file = File::findOrFail($id);
+        $file->delete(); // soft-delete
+        return response()->json([
+            'success' => true,
+            'message' => 'File deleted.',
+        ]);
     }
 
     /**
@@ -104,7 +110,7 @@ class FileManagerController extends Controller
     public function getJson()
     {
         $files = File::with('media')->latest()->paginate(24);
-        
+
         $files->getCollection()->transform(function ($file) {
             $media = $file->getFirstMedia('default');
             return [

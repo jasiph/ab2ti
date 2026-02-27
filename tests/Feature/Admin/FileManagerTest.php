@@ -51,18 +51,56 @@ class FileManagerTest extends TestCase
         $this->assertTrue($uploadedFile->hasMedia('default'));
     }
 
-    public function test_can_delete_file()
+    public function test_can_soft_delete_file()
     {
         $user = User::factory()->create();
         $fileModel = File::create(['user_id' => $user->id, 'name' => 'delete_me.jpg']);
 
-        // Attach media
         $file = UploadedFile::fake()->image('delete_me.jpg');
         $fileModel->addMedia($file)->toMediaCollection('default');
 
         $response = $this->actingAs($user)->delete(route('admin.files.destroy', $fileModel));
 
-        $response->assertRedirect();
+        $response->assertJson(['success' => true]);
+        // File should still exist in DB (soft-deleted)
+        $this->assertDatabaseHas('files', ['id' => $fileModel->id]);
+        $this->assertSoftDeleted('files', ['id' => $fileModel->id]);
+    }
+
+    public function test_can_restore_soft_deleted_file()
+    {
+        $user = User::factory()->create();
+        $fileModel = File::create(['user_id' => $user->id, 'name' => 'restore_me.jpg']);
+
+        $file = UploadedFile::fake()->image('restore_me.jpg');
+        $fileModel->addMedia($file)->toMediaCollection('default');
+
+        // Soft-delete first
+        $fileModel->delete();
+        $this->assertSoftDeleted('files', ['id' => $fileModel->id]);
+
+        // Restore
+        $response = $this->actingAs($user)->post(route('admin.files.restore', $fileModel->id));
+
+        $response->assertJson(['success' => true]);
+        $this->assertDatabaseHas('files', ['id' => $fileModel->id, 'deleted_at' => null]);
+    }
+
+    public function test_can_force_delete_file()
+    {
+        $user = User::factory()->create();
+        $fileModel = File::create(['user_id' => $user->id, 'name' => 'gone_forever.jpg']);
+
+        $file = UploadedFile::fake()->image('gone_forever.jpg');
+        $fileModel->addMedia($file)->toMediaCollection('default');
+
+        // Soft-delete first
+        $fileModel->delete();
+
+        // Force-delete
+        $response = $this->actingAs($user)->delete(route('admin.files.force-delete', $fileModel->id));
+
+        $response->assertJson(['success' => true]);
         $this->assertDatabaseMissing('files', ['id' => $fileModel->id]);
     }
 }

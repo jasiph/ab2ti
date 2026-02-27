@@ -1,33 +1,57 @@
 <script setup>
-import { computed } from "vue";
+import { computed, nextTick } from "vue";
 import BaseModal from "@/Components/Base/BaseModal.vue";
 import BaseButton from "@/Components/Base/BaseButton.vue";
-import { router } from "@inertiajs/vue3";
-import { useConfirm } from "@/Composables/useConfirm";
+import { useUndoToast } from "@/Composables/useUndoToast";
+import axios from "axios";
 
 const props = defineProps({
     show: Boolean,
     file: Object,
 });
 
-const emit = defineEmits(["close"]);
+const emit = defineEmits(["close", "deleted", "restored"]);
 
 const close = () => emit("close");
 
 const isImage = computed(() => props.file?.mime_type?.startsWith("image/"));
 
-const { confirm } = useConfirm();
+const { showUndoToast } = useUndoToast();
 
 const deleteFile = async () => {
-    const ok = await confirm({
-        title: 'Delete File',
-        message: 'Are you sure you want to delete this file?',
-        confirmText: 'Delete',
-    });
-    if (ok) {
-        router.delete(route("admin.files.destroy", props.file.id), {
-            onSuccess: () => close(),
+    const fileId = props.file.id;
+    const fileName = props.file.name || props.file.file_name;
+console.log("===>" + fileId)
+
+    try {
+        await axios.delete(`/admin/files/${fileId}`);
+        close();
+        console.log("===>" + fileId)
+        emit("deleted", fileId);
+
+        // Wait for modal to start closing before showing toast
+        await nextTick();
+
+        showUndoToast({
+            message: `"${fileName}" deleted`,
+            onUndo: async () => {
+                try {
+                    const { data } = await axios.post(`/admin/files/${fileId}/restore`);
+                    emit("restored", data.file);
+                } catch (e) {
+                    console.error("Failed to restore file:", e);
+                }
+            },
+            onExpire: async () => {
+                try {
+                    await axios.delete(`/admin/files/${fileId}/force`);
+                } catch (e) {
+                    console.error("Failed to permanently delete file:", e);
+                }
+            },
         });
+    } catch (e) {
+        console.error("Failed to delete file:", e);
     }
 };
 

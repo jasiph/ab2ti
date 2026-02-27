@@ -16,6 +16,9 @@ const search = ref("");
 const showPreview = ref(false);
 const selectedFile = ref(null);
 
+// Reactive local copy of the file list
+const localFiles = ref([...props.files.data]);
+
 const onFileClick = (file) => {
     selectedFile.value = file;
     showPreview.value = true;
@@ -24,6 +27,15 @@ const onFileClick = (file) => {
 const closePreview = () => {
     showPreview.value = false;
     selectedFile.value = null;
+};
+
+const onFileDeleted = (fileId) => {
+    localFiles.value = localFiles.value.filter((f) => f.id !== fileId);
+};
+
+const onFileRestored = (file) => {
+    // Insert back in the correct position (by created_at desc, or just prepend)
+    localFiles.value.unshift(file);
 };
 
 const isImage = (file) => {
@@ -50,7 +62,7 @@ const isImage = (file) => {
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <!-- Grid View -->
-                <FileGrid :files="files.data" @file-click="onFileClick" />
+                <FileGrid :files="localFiles" @file-click="onFileClick" />
 
                 <div class="mt-6">
                      <BasePagination :links="files.links" />
@@ -62,6 +74,8 @@ const isImage = (file) => {
             :show="showPreview"
             :file="selectedFile"
             @close="closePreview"
+            @deleted="onFileDeleted"
+            @restored="onFileRestored"
         />
     </AppLayout>
 </template>

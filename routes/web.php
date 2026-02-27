@@ -86,6 +86,8 @@ Route::middleware([
         // File Manager
         Route::get('files/json', [\App\Http\Controllers\Admin\FileManagerController::class , 'getJson'])->name('files.json');
         Route::post('files/upload-json', [\App\Http\Controllers\Admin\FileManagerController::class , 'storeJson'])->name('files.upload-json');
+        Route::post('files/{file}/restore', [\App\Http\Controllers\Admin\FileManagerController::class , 'restore'])->name('files.restore');
+        Route::delete('files/{file}/force', [\App\Http\Controllers\Admin\FileManagerController::class , 'forceDelete'])->name('files.force-delete');
         Route::resource('files', \App\Http\Controllers\Admin\FileManagerController::class);
 
         // Hero Management
