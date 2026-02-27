@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definisi Variabel Warna (RGB values) agar bisa pakai opacity di Tailwind */
+@layer base {
+    :root {
+        /* LIGHT MODE - AB2TI Earthy & Organic */
+        /* Background: Warm Ivory */
+        --color-background: 252 251 247;
+        /* Surface: Clean White */
+        --color-surface: 255 255 255;
+        /* Surface Variant: Sage-tinted */
+        --color-surface-variant: 243 244 240;
+
+        /* Primary: AB2TI Green (Logo Triangle) */
+        --color-primary: 22 101 52;
+        /* Primary Dark: Deep Forest Green */
+        --color-primary-dark: 14 68 35;
+
+        /* Secondary: Harvest Gold (Logo Wheat) */
+        --color-secondary: 202 155 30;
+
+        /* Accent: Terracotta (Earthy Soil) */
+        --color-accent: 180 83 40;
+
+        /* Text: Dark Earth */
+        --color-text-main: 25 25 20;
+        /* Text Muted: Olive Gray */
+        --color-text-muted: 107 114 100;
+
+        /* Border: Sage Border */
+        --color-border: 220 225 215;
+    }
+
+    /* DARK MODE - Deep Forest */
+    .dark {
+        /* Background: Deep Forest Night */
+        --color-background: 10 15 13;
+        /* Surface: Dark Green-Gray */
+        --color-surface: 20 30 25;
+        /* Surface Variant: Muted Forest */
+        --color-surface-variant: 30 42 35;
+
+        /* Primary: Bright Green (Readable on dark) */
+        --color-primary: 34 160 80;
+        /* Primary Dark: Medium Green */
+        --color-primary-dark: 22 130 65;
+
+        /* Secondary: Bright Gold */
+        --color-secondary: 224 180 50;
+
+        /* Accent: Warm Amber */
+        --color-accent: 210 120 60;
+
+        /* Text: Warm White */
+        --color-text-main: 245 243 238;
+        /* Text Muted: Sage Gray */
+        --color-text-muted: 148 158 145;
+
+        /* Border: Forest Border */
+        --color-border: 40 55 45;
+    }
+}
+@layer utilities {
+    /* 1. Mengatur Lebar & Tinggi Scrollbar */
+    ::-webkit-scrollbar {
+        width: 6px;  /* Lebar untuk scroll vertikal (Sangat ramping) */
+        height: 6px; /* Tinggi untuk scroll horizontal */
+    }
+
+    /* 2. Mengatur Track (Jalur lintasan scroll) */
+    ::-webkit-scrollbar-track {
+        background: transparent; /* Transparan agar menyatu dengan bg */
+    }
+
+    /* 3. Mengatur Thumb (Batang yang bergerak) */
+    ::-webkit-scrollbar-thumb {
+        /* Warna default (Light Mode) */
+        background-color: rgb(209 213 219); /* gray-300 */
+        border-radius: 20px;       /* Membuat sudut bulat sempurna */
+        border: 2px solid transparent; /* Memberi jarak nafas */
+        background-clip: content-box;
+    }
+
+    /* 4. Warna Thumb saat Dark Mode aktif */
+    .dark ::-webkit-scrollbar-thumb {
+        background-color: rgb(55 65 81); /* gray-700 (Senada dengan bg-surface) */
+    }
+
+    /* 5. Efek Hover (Saat mouse diarahkan ke scrollbar) */
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: rgb(156 163 175); /* gray-400 */
+    }
+    
+    .dark ::-webkit-scrollbar-thumb:hover {
+        background-color: rgb(75 85 99); /* gray-600 (Lebih terang dikit) */
+    }
+}
