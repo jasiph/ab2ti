@@ -31,7 +31,7 @@ class Hero extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->registerMediaConversions();
+        $this->addMediaCollection('hero-backgrounds');
     }
 
     public function registerMediaConversions(?Media $media = null): void

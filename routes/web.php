@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WelcomeSectionController;
 use App\Http\Controllers\PageController;
+use App\Support\CmsPath;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
@@ -175,7 +176,8 @@ Route::middleware($authenticate)
         });
     });
 
-// Frontend CMS catch-all route (keep at bottom to avoid conflicts)
+// Frontend CMS catch-all (keep last). Nested slugs remain allowed; reserved
+// first segments are excluded via config/cms.php.
 Route::get('/{slug}', [PageController::class, 'show'])
-    ->where('slug', '.*')
+    ->where('slug', CmsPath::catchAllConstraint())
     ->name('pages.show');

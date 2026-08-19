@@ -5,9 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\File;
 use App\Models\Page;
+use App\Support\CmsPath;
+use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -18,7 +19,7 @@ class PageController extends Controller
         $query = Page::with('media');
 
         if ($request->filled('search')) {
-            $query->where('title', 'like', '%' . $request->search . '%');
+            $query->where('title', 'like', '%'.$request->search.'%');
         }
 
         return Inertia::render('Admin/Pages/Index', [
@@ -34,9 +35,13 @@ class PageController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge([
+            'slug' => CmsPath::normalize((string) $request->input('slug', '')),
+        ]);
+
         $rules = [
             'title' => 'required|string|max:255',
-            'slug' => 'required|string|alpha_dash|unique:pages,slug',
+            'slug' => $this->slugRules(),
             'content' => 'nullable|string',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
@@ -54,7 +59,7 @@ class PageController extends Controller
         DB::transaction(function () use ($request, $validated): void {
             $page = Page::create([
                 'title' => $validated['title'],
-                'slug' => Str::slug($validated['slug']),
+                'slug' => $validated['slug'],
                 'content' => $validated['content'] ?? null,
                 'meta_title' => $validated['meta_title'] ?? $validated['title'],
                 'meta_description' => $validated['meta_description'] ?? null,
@@ -72,7 +77,7 @@ class PageController extends Controller
                 $mediaItem->copy($page, 'page-cover');
             }
 
-            if (!empty($validated['existing_cover_asset_id'])) {
+            if (! empty($validated['existing_cover_asset_id'])) {
                 $asset = File::with('media')->find($validated['existing_cover_asset_id']);
                 if ($asset && $mediaItem = $asset->getFirstMedia('default')) {
                     $mediaItem->copy($page, 'page-cover');
@@ -94,9 +99,13 @@ class PageController extends Controller
 
     public function update(Request $request, Page $page)
     {
+        $request->merge([
+            'slug' => CmsPath::normalize((string) $request->input('slug', '')),
+        ]);
+
         $rules = [
             'title' => 'required|string|max:255',
-            'slug' => ['required', 'alpha_dash', Rule::unique('pages')->ignore($page->id)],
+            'slug' => $this->slugRules($page),
             'content' => 'nullable|string',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
@@ -115,7 +124,7 @@ class PageController extends Controller
         DB::transaction(function () use ($request, $page, $validated): void {
             $page->update([
                 'title' => $validated['title'],
-                'slug' => Str::slug($validated['slug']),
+                'slug' => $validated['slug'],
                 'content' => $validated['content'] ?? null,
                 'meta_title' => $validated['meta_title'] ?? $validated['title'],
                 'meta_description' => $validated['meta_description'] ?? null,
@@ -133,14 +142,14 @@ class PageController extends Controller
                 $mediaItem->copy($page, 'page-cover');
             }
 
-            if (!empty($validated['existing_cover_asset_id'])) {
+            if (! empty($validated['existing_cover_asset_id'])) {
                 $asset = File::with('media')->find($validated['existing_cover_asset_id']);
                 if ($asset && $mediaItem = $asset->getFirstMedia('default')) {
                     $mediaItem->copy($page, 'page-cover');
                 }
             }
 
-            if (!empty($validated['remove_cover'])) {
+            if (! empty($validated['remove_cover'])) {
                 $page->clearMediaCollection('page-cover');
             }
         });
@@ -159,9 +168,35 @@ class PageController extends Controller
     public function toggle(Page $page)
     {
         $page->update([
-            'is_active' => !$page->is_active,
+            'is_active' => ! $page->is_active,
         ]);
 
         return back()->with('success', 'Page status updated.');
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    private function slugRules(?Page $page = null): array
+    {
+        return [
+            'required',
+            'string',
+            'max:255',
+            Rule::unique('pages', 'slug')->ignore($page),
+            function (string $attribute, mixed $value, Closure $fail): void {
+                $normalized = CmsPath::normalize((string) $value);
+
+                if (! CmsPath::hasValidShape($normalized)) {
+                    $fail('The slug may only contain lowercase letters, numbers, dashes, and slashes between segments.');
+
+                    return;
+                }
+
+                if (CmsPath::isReserved($normalized)) {
+                    $fail('This slug uses a reserved application path and cannot be used for a CMS page.');
+                }
+            },
+        ];
     }
 }

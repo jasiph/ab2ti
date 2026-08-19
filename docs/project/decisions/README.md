@@ -41,3 +41,4 @@ Number from `0001` upward. Do not rewrite accepted ADRs; supersede them.
 |---|---|---|
 | 0001 | Retain cleaned Laravel/Vue kernel; Constitution is governance | Accepted |
 | 0002 | Disable public self-registration | Accepted |
+| 0003 | Reserve application paths from CMS | Accepted |

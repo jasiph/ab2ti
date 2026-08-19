@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Hero;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class HeroController extends Controller
@@ -20,14 +20,14 @@ class HeroController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10)
             ->through(function ($hero) {
-            return [
-            'id' => $hero->id,
-            'title' => $hero->title,
-            'is_active' => $hero->is_active,
-            'created_at' => $hero->created_at,
-            'background_image' => $hero->getFirstMediaUrl('hero-backgrounds', 'thumb'),
-            ];
-        });
+                return [
+                    'id' => $hero->id,
+                    'title' => $hero->title,
+                    'is_active' => $hero->is_active,
+                    'created_at' => $hero->created_at,
+                    'background_image' => $hero->getFirstMediaUrl('hero-backgrounds', 'thumb'),
+                ];
+            });
 
         return Inertia::render('Admin/Hero/Index', [
             'heroes' => $heroes,
@@ -68,7 +68,7 @@ class HeroController extends Controller
                 'is_active' => $validated['is_active'] ?? false,
             ]);
 
-            if (!empty($request->file_ids)) {
+            if (! empty($request->file_ids)) {
                 foreach ($request->file_ids as $fileId) {
                     $file = \App\Models\File::find($fileId);
                     if ($file) {
@@ -90,7 +90,7 @@ class HeroController extends Controller
      */
     public function show(string $id)
     {
-    //
+        //
     }
 
     /**
@@ -110,12 +110,12 @@ class HeroController extends Controller
                 'button_url' => $hero->button_url,
                 'is_active' => $hero->is_active,
                 'images' => $hero->getMedia('hero-backgrounds')->map(function ($media) {
-            return [
+                    return [
                         'id' => $media->id,
                         'url' => $media->getUrl(),
                         'thumbnail_url' => $media->getUrl('thumb'),
                     ];
-        }),
+                }),
             ],
         ]);
     }
@@ -151,7 +151,7 @@ class HeroController extends Controller
             ]);
 
             // Handle new files
-            if (!empty($request->file_ids)) {
+            if (! empty($request->file_ids)) {
                 foreach ($request->file_ids as $fileId) {
                     $file = \App\Models\File::find($fileId);
                     if ($file) {
@@ -163,9 +163,11 @@ class HeroController extends Controller
                 }
             }
 
-            // Handle removed files
-            if (!empty($request->remove_media_ids)) {
-                Media::whereIn('id', $request->remove_media_ids)->delete();
+            if (! empty($request->remove_media_ids)) {
+                $hero->media()
+                    ->whereIn('id', $request->remove_media_ids)
+                    ->get()
+                    ->each(fn (Media $media) => $media->delete());
             }
         });
 
