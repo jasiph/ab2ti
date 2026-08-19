@@ -25,4 +25,4 @@ Developer DBs MAY still contain leftover church tables whose migrations were rem
 - Distinguish data migrations from schema migrations when both are needed.
 - Prefer reversible `down()` where technically safe. Consider running-app compatibility.
 - Validate risky migrations on an **isolated** SQLite file (or equivalent), without modifying the active development DB.
-- Do not run `composer setup` unasked (`migrate --force` + broken `npm run build`).
+- Do not run `composer setup` unasked (it runs `php artisan migrate` on whatever `.env` points at).

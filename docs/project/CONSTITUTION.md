@@ -154,7 +154,7 @@ Authentication and authorization are separate concerns.
 **Frontend menu visibility is not security.**
 `usePermission` / `useNavigation` are UX. Protected operations MUST be authorized **server-side** (policy, `authorize()`, `can:` middleware, or equivalent) before they mutate or return sensitive data.
 
-Current state: `/admin/*` is protected by `auth` plus Spatie `permission:` middleware mapped from `config/acl.php`. Completing remaining ACL hygiene (unused `culture.*` / `artikel.*`, leftover `access settings`) is Foundation Backlog, not an excuse to skip server-side checks on new modules.
+Current state: `/admin/*` is protected by `auth` plus Spatie `permission:` middleware mapped from `config/acl.php`. Completing remaining ACL hygiene (`access settings` unused) is Foundation Backlog, not an excuse to skip server-side checks on new modules.
 
 Future AB2TI modules MUST declare their authorization model (which permissions/roles gate which operations) in the implementation plan.
 
@@ -177,9 +177,9 @@ Those items are in the Foundation Backlog until resolved.
 
 **Catch-all rule:** `GET /{slug}` (`pages.show`) MUST remain last among web GET routes. Explicit application routes MUST be registered before it.
 
-The catch-all currently uses `where('slug', '.*')`. Tightening that constraint is Foundation Hardening. Until then, new explicit routes MUST be declared above the catch-all so they are not shadowed.
+The catch-all excludes reserved first segments from `config/cms.php` (ADR 0003). Nested CMS slugs remain allowed. New explicit routes MUST still be declared above the catch-all.
 
-Legacy aliases `/sermons` and `/events` MUST NOT be renamed or removed in Phase 0B. They are unresolved information-architecture debt. No public URL changes without an explicit routing/IA decision.
+Legacy aliases `/sermons` and `/events` MUST NOT be renamed or removed without an information-architecture ADR. No public URL changes without an explicit routing/IA decision.
 
 Admin URLs stay under `/admin` with names `admin.*`. Dashboard exists at both `/dashboard` and `/admin/dashboard`; do not invent a third dashboard URL without an ADR.
 
@@ -334,7 +334,7 @@ Before adding a dependency, the plan MUST:
 - note maintenance/security impact,
 - document it if it becomes an architectural dependency.
 
-Do not remove `bacon/bacon-qr-code` in this governance phase. Its leftover status is Foundation Hardening.
+`bacon/bacon-qr-code` is a **transitive** Fortify dependency (2FA QR codes). Do not remove it from the lockfile.
 
 Do not upgrade Laravel, Vue, Tailwind, or Vite as a side effect of feature work.
 

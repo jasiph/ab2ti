@@ -4,7 +4,7 @@ This document describes **current reality** after Phase 0A (legacy Presbi/church
 
 Captured from repository inspection on 2026-08-19.
 
-Source commit: `47a3c3b2a03c1edc407a132a231f014cf1768829` (governance). Hardening 0C-A updates authorization, registration, File Manager, tests, and `npm run build` on top of that baseline.
+Source commit: `8b6d413b47585d697f1dd4e9893ea46a252e6194` (Phase 0C-A). Phase 0C-B updates CMS reserved paths, Hero media, ACL/config hygiene, and local-DB procedure.
 
 ---
 
@@ -38,7 +38,7 @@ Fortify is installed via Jetstream (not a direct `composer.json` require).
 | Vue | `^3.3.13` | JavaScript, not TypeScript (`jsconfig.json` only) |
 | `@inertiajs/vue3` | `^2.0` | |
 | Tailwind CSS | `^3.4.0` | `tailwind.config.js` + `@tailwind` directives |
-| `@tailwindcss/vite` | `^4.0.0` | **not wired** in `vite.config.js` |
+| `@tailwindcss/vite` | (removed in 0C-B; was unused vs Tailwind 3) |
 | Vite | `^7.0.7` | `vite.config.js` uses `laravel-vite-plugin` + `@vitejs/plugin-vue` |
 | Tiptap | `^3.20.1` | CMS editor |
 | `laravel-vue-i18n` | `^2.8.0` | |
@@ -79,10 +79,10 @@ Admin controllers are resource-style CRUD. There is no domain service/action lay
 ## Authentication
 
 - **Fortify** guard `web`; Jetstream stack `inertia`; Jetstream guard `sanctum`.
-- Features enabled: password reset, email verification (Fortify feature flag only), profile/password update, two-factor authentication, API tokens, account deletion.
+- Features enabled: password reset, profile/password update, two-factor authentication, API tokens, account deletion.
 - **Public self-registration is disabled** (`Features::registration()` is not listed). See ADR `0002-disable-public-registration.md`.
-- Features disabled: Jetstream teams, Jetstream profile photos, terms/privacy feature flag, **Fortify registration**.
-- `User` does **not** implement `MustVerifyEmail` (commented import). Admin/dashboard routes no longer use the no-op `verified` middleware. Email verification remains deferred.
+- **Fortify email verification feature is disabled.** `User` does **not** implement `MustVerifyEmail`. Email verification remains a deferred product decision.
+- Features disabled: Jetstream teams, Jetstream profile photos, terms/privacy, Fortify registration, Fortify email verification.
 - Login rate limit: 5/minute (Fortify).
 - Session driver in `.env.example`: database; `SESSION_ENCRYPT=false`.
 
@@ -94,7 +94,7 @@ This is session SPA authentication, not a token-first public API. `routes/api.ph
 
 Spatie Permission is installed. Permissions are defined in `config/acl.php` and synced with `php artisan acl:sync`.
 
-Current groups: `users`, `roles`, `cms`, `settings`, `culture`, `media`, `heroes`, `artikel`.
+Current groups: `users`, `roles`, `cms`, `settings`, `media`, `heroes`.
 
 `Gate::before` grants every ability to role `super-admin`.
 
@@ -102,7 +102,7 @@ Current groups: `users`, `roles`, `cms`, `settings`, `culture`, `media`, `heroes
 
 Vue `usePermission` / `useNavigation` still hide menus (UX only). Navigation permission names were aligned to ACL: File Manager uses `media.view`; Pages/Block Templates use `cms.view`. Jetstream `profile.show` is not gated by `access settings`.
 
-Still unused: `culture.*`, `artikel.*`, `access settings`.
+**Phase 0C-B:** unused `culture.*` / `artikel.*` groups were removed from `config/acl.php`. Developer databases previously synced MAY still contain those permission rows until an intentional `acl:sync --clean`. Still unused in config: `access settings`.
 
 Do **not** run `acl:sync` against the active development database as a side effect of feature work. Tests seed permissions on the in-memory SQLite test database.
 
@@ -162,11 +162,12 @@ Jetstream leftovers still exist alongside Base: `PrimaryButton`, `SecondaryButto
 
 - `pages`: slug (unique), HTML `content`, `meta_title`, `meta_description`, JSON `settings`, `is_active`, optional Spatie cover collection `page-cover`.
 - `block_templates`: reusable HTML snippets for Tiptap (`html_content`, `is_active`).
-- `heroes`: landing hero + Spatie collection `hero-backgrounds` (collection registration is incomplete; conversions exist).
+- `heroes`: landing hero + Spatie collection `hero-backgrounds` (explicitly registered; conversions `large` and `thumb`; multiple files).
 - `welcome_sections`: landing welcome copy/CTA/`image_url`.
 - Public renderer: `PageController@show` → `Frontend/Page/Show.vue` (`v-html` of `page.content`).
 - Shortcuts: `/about`, `/sermons`, `/events`, `/contact` map to page slugs of the same name.
-- Catch-all: `GET /{slug}` with `where('slug', '.*')` registered **last** in `routes/web.php`.
+- Catch-all: `GET /{slug}` last; constraint from `config/cms.php` via `App\Support\CmsPath` (ADR 0003). Nested slugs allowed. Reserved first segments cannot be CMS pages.
+- Page create/update validation rejects reserved first segments and allows nested slugs (`about/team`).
 
 There is no posts/news/tags/menu CMS, no scheduling, no draft workflow beyond `is_active`.
 
@@ -231,6 +232,8 @@ Present:
 - Jetstream/Fortify feature tests (auth, profile, password, 2FA, API tokens, registration disabled, browser sessions, account deletion)
 - `tests/Feature/Admin/FileManagerTest.php`
 - `tests/Feature/Admin/AdminAuthorizationTest.php`
+- `tests/Feature/Admin/HeroMediaTest.php`
+- `tests/Feature/Cms/CmsRoutingTest.php`
 - Placeholder `ExampleTest` (unit + feature GET `/` with `RefreshDatabase`)
 
 Known failures (Phase 0A, **resolved in Phase 0C-A**):
@@ -251,7 +254,7 @@ Quality commands that actually exist:
 | Command | Reality |
 |---|---|
 | `composer dev` | `artisan serve` + queue listen + pail + `npm run dev` |
-| `composer setup` | install, copy `.env`, `key:generate`, **`migrate --force`**, `npm install`, `npm run build` |
+| `composer setup` | install, copy `.env` if missing, `key:generate`, `php artisan migrate` (**no `--force`**), `npm install`, `npm run build`. Intended for a new local checkout; do not run against a populated developer DB unasked. |
 | `npm run build` | Client production Vite build (`vite build`); SSR not wired |
 | `npx vite build` | Same client production build |
 | CI/CD | None (no `.github/workflows`, no GitLab CI) |
@@ -267,21 +270,21 @@ Verified from source and Phase 0A/0C-A validation. Not a wish list.
 
 1. ~~Admin authorization is UI-only.~~ **Resolved in 0C-A** (route `permission:` middleware). Dashboard remains auth-only.
 2. ~~Public registration is enabled.~~ **Resolved in 0C-A** (Fortify registration disabled; ADR 0002).
-3. `MustVerifyEmail` is not implemented; email verification remains deferred (Fortify flag still present).
-4. CMS catch-all `/{slug}` uses `.*`.
-5. `/sermons` and `/events` are leftover CMS aliases.
+3. `MustVerifyEmail` is not implemented; Fortify email-verification **feature is disabled**. Product decision remains deferred.
+4. ~~CMS catch-all `/{slug}` uses `.*`.~~ **Resolved in 0C-B** (reserved first segments; ADR 0003).
+5. `/sermons` and `/events` remain CMS aliases — **deferred to Phase 1 IA**.
 6. `access settings` remains unused; Jetstream profile is self-service.
-7. `culture.*` and `artikel.*` permissions have no modules.
+7. ~~`culture.*` / `artikel.*` in acl.php.~~ **Removed from config in 0C-B**. Stale DB rows may remain until intentional `acl:sync --clean`.
 8. ~~FileManager restore/forceDelete routes without methods.~~ **Resolved in 0C-A**.
-9. Hero media collection registration is incorrect (`registerMediaCollections` calls conversions).
-10. ~~`npm run build` is unusable.~~ **Resolved in 0C-A** (`vite build`). `composer setup` still runs `migrate --force` (operational hazard; do not run unasked).
+9. ~~Hero media collection registration incorrect.~~ **Resolved in 0C-B** (`hero-backgrounds`).
+10. ~~`npm run build` is unusable.~~ **Resolved in 0C-A**. ~~`composer setup` `--force`.~~ **Removed in 0C-B**.
 11. `HandleInertiaRequests` shares dotted `auth.user.*` keys.
 12. Dual button/modal component families (Jetstream vs Base).
-13. Tailwind v3 runtime vs unused `@tailwindcss/vite` v4 dependency.
-14. `bacon/bacon-qr-code` remains in the lockfile after letter-domain removal (transitive; not a direct `composer.json` require).
-15. Historical church tables may remain in developer databases.
-16. `BaseSearchSelect` / `DashboardStatCard` unused.
-17. Default app name / some Jetstream copy still say “Laravel”.
-18. No Form Requests, no Policies, no project README, no CI.
+13. ~~Tailwind v3 vs unused `@tailwindcss/vite` v4.~~ **Removed unused package in 0C-B**.
+14. `bacon/bacon-qr-code` is **kept** (transitive via `laravel/fortify` for 2FA QR codes).
+15. Historical church tables may remain in developer databases — see `docs/project/LOCAL_DATABASE_RECOVERY.md`.
+16. `BaseSearchSelect` / `DashboardStatCard` unused — **deferred until a real AB2TI use case**.
+17. README is still the default Laravel skeleton README (not application chrome).
+18. No Form Requests, no Policies, no CI.
 
 See `docs/project/FOUNDATION_BACKLOG.md` for classification and recommended hardening order.

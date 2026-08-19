@@ -26,19 +26,19 @@ Priority key:
 | Decision needed | Keep aliases, add redirects from better URLs, or replace once page slugs exist |
 | Phase 0B | Not changed |
 | Phase 0C-A | Not changed |
+| Phase 0C-B | **DEFERRED TO PHASE 1 INFORMATION ARCHITECTURE.** Not renamed, redirected, or relabeled. Tests still cover `/sermons` and `/events`. |
 
 ## 2. `culture.*` / `artikel.*` permissions
 
 | Field | Content |
 |---|---|
-| Priority | **P1** before any ACL/roles product work |
-| Issue | `config/acl.php` defines `culture.*` and `artikel.*`. No matching modules, routes, or nav entries remain. |
-| Evidence | `config/acl.php`; no controllers/pages for those names |
-| Risk | Role UI exposes empty permission groups; future modules may reuse names incorrectly |
-| Recommended phase | 0C hardening (trim unused groups) **or** first module that actually needs them |
-| Decision needed | Delete unused groups vs reserve names for AB2TI content types |
+| Priority | **RESOLVED** (0C-B) |
+| Issue | `config/acl.php` defined `culture.*` and `artikel.*` with no matching modules. |
+| Previous condition | Empty permission groups in the Role UI catalog. |
+| Resolution | Groups removed from `config/acl.php`. Seeder no longer assigns them. `acl:sync` was **not** run against the active development database; stale rows MAY remain until an operator runs sync `--clean` on a DB they maintain. |
 | Phase 0B | Not changed |
 | Phase 0C-A | Not changed (no unused-group trim) |
+| Phase 0C-B | Resolved in config only |
 
 ## 3. Server-side authorization incomplete / UI-driven
 
@@ -67,19 +67,20 @@ Priority key:
 | Validation | `RegistrationTest` (disabled branch, including POST `/register` 404). Login and password-reset tests remain. |
 | Phase 0B | Not changed |
 | Phase 0C-A | Registration resolved; MustVerifyEmail still deferred |
+| Phase 0C-B | Fortify email-verification **feature disabled** (no active behavior). MustVerifyEmail still **not** implemented. |
 
 ## 5. `/{slug}` CMS catch-all
 
 | Field | Content |
 |---|---|
-| Priority | **P1** (correctness/routing); treat as **P0** if new public routes are added before it is tightened |
-| Issue | `Route::get('/{slug}')` with `where('slug', '.*')` is last but overly greedy (nested paths). |
-| Evidence | `routes/web.php` |
-| Risk | Future routes or static paths can be swallowed; harder-to-reason 404 vs CMS |
-| Recommended phase | 0C routing hardening, before new public modules |
-| Decision needed | Allowed slug pattern; reserved path denylist |
+| Priority | **RESOLVED** (0C-B) |
+| Issue | Catch-all used `where('slug', '.*')` and could swallow system first segments. |
+| Previous condition | GET `/register` hit CMS catch-all; reserved namespaces were not validated on Page save. |
+| Resolution | Canonical reserved list in `config/cms.php`; `App\Support\CmsPath` used by route constraint and Page validation (ADR 0003). Nested slugs remain allowed. |
+| Validation | `tests/Feature/Cms/CmsRoutingTest.php`, `tests/Unit/CmsPathTest.php`. |
 | Phase 0B | Not changed |
 | Phase 0C-A | Not changed |
+| Phase 0C-B | Resolved |
 
 ## 6. FileManager restore / forceDelete failures
 
@@ -98,14 +99,14 @@ Priority key:
 
 | Field | Content |
 |---|---|
-| Priority | **P1** before hero/landing content work |
-| Issue | `Hero::registerMediaCollections()` calls `registerMediaConversions()` instead of declaring `hero-backgrounds`. Landing and admin still use that collection name. |
-| Evidence | `app/Models/Hero.php`; `routes/web.php` welcome closure; `HeroController` |
-| Risk | Missing conversions/collections; fragile media copies |
-| Recommended phase | 0C media hardening |
-| Decision needed | None beyond fixing collection registration |
+| Priority | **RESOLVED** (0C-B) |
+| Issue | `Hero::registerMediaCollections()` called `registerMediaConversions()` instead of declaring `hero-backgrounds`. |
+| Previous condition | Collection not explicitly registered. |
+| Resolution | `addMediaCollection('hero-backgrounds')`; conversions stay in `registerMediaConversions`. Multiple backgrounds. Hero media deletes are scoped to that hero. |
+| Validation | `tests/Feature/Admin/HeroMediaTest.php`. |
 | Phase 0B | Not changed |
 | Phase 0C-A | Not changed |
+| Phase 0C-B | Resolved |
 
 ## 8. `npm run build` script issue
 
@@ -114,62 +115,54 @@ Priority key:
 | Priority | **RESOLVED** (0C-A) for the npm script. SSR remains out of scope. |
 | Issue | `package.json` `"build"` repeated `vite build` / `--ssr` flags. `npx vite build` worked. `composer setup` invokes `npm run build`. |
 | Previous condition | Broken npm build script. |
-| Resolution | `"build": "vite build"` (client production build only). No SSR introduced. Unused `@tailwindcss/vite` not addressed. |
-| Validation | `npm run build` in this phase. |
+| Resolution | `"build": "vite build"` (client production build only). No SSR introduced. |
+| Validation | `npm run build`. |
 | Phase 0B | Not changed |
-| Phase 0C-A | npm script resolved; `composer setup` still runs `migrate --force` (do not run unasked) |
+| Phase 0C-A | npm script resolved; `composer setup` still ran `migrate --force` |
+| Phase 0C-B | `composer setup` uses `php artisan migrate` **without** `--force`. Unused `@tailwindcss/vite` removed. |
 
 ## 9. Historical church tables in developer DB
 
 | Field | Content |
 |---|---|
-| Priority | **P1** before the next schema change on a dirty local DB; never a silent DROP |
-| Issue | Phase 0A deleted church *migrations*. Databases migrated earlier MAY still have `congregations`, `letters`, `songs`, etc. |
-| Evidence | Phase 0A report; Constitution §5; no DROP was run |
-| Risk | Confusion (“schema drift”); accidental reuse; unsafe manual drops |
-| Recommended phase | 0C documented leftover-table procedure (opt-in, disposable DB only unless operator consents) |
-| Decision needed | Ignore leftovers vs operator-run cleanup script vs documented SQL for volunteers |
+| Priority | **RESOLVED** (0C-B documentation). Leftover tables themselves are not dropped. |
+| Issue | Phase 0A deleted church *migrations*. Databases migrated earlier MAY still have leftover tables. |
+| Resolution | Documented in `docs/project/LOCAL_DATABASE_RECOVERY.md`. No automatic DROP. Preferred path: new disposable DB + canonical migrate. |
 | Phase 0B | Not changed; active DB not inspected destructively |
 | Phase 0C-A | Not changed; active DB not modified |
+| Phase 0C-B | Procedure documented; **no** active DB mutation |
 
 ## 10. `BaseSearchSelect` / `DashboardStatCard` design-system status
 
 | Field | Content |
 |---|---|
-| Priority | **P2** |
-| Issue | Both components remain; no callers after Phase 0A. Constitution forbids auto-promoting them. |
-| Evidence | `resources/js/Components/Base/BaseSearchSelect.vue`; `resources/js/Components/DashboardStatCard.vue` |
-| Risk | Dead code vs premature deletion of useful primitives |
-| Recommended phase | When an AB2TI UI task would reuse them, or a dedicated UI consolidation task |
-| Decision needed | Keep as candidates vs delete in a chore |
+| Priority | **DEFERRED UNTIL REAL AB2TI USE CASE** |
+| Issue | Both components remain; no callers after Phase 0A. Not promoted to the design system. Not removed. |
 | Phase 0B | Not changed |
 | Phase 0C-A | Not changed |
+| Phase 0C-B | Confirmed still unused; deferred |
 
 ## 11. `bacon/bacon-qr-code` dependency status
 
 | Field | Content |
 |---|---|
-| Priority | **P2** |
-| Issue | Letter/QR code domain was removed. Package is not a direct `composer.json` require; it remains in the lockfile as a leftover transitive. Constitution forbids removing it in 0B. |
-| Evidence | `composer.lock`; no `QrCodeService` |
-| Risk | Unused code in vendor; noise |
-| Recommended phase | 0C dependency audit (`composer why bacon/bacon-qr-code`) then remove only if unused |
-| Decision needed | Confirm no remaining transitive need |
+| Priority | **RESOLVED** (0C-B — keep) |
+| Issue | Appeared leftover after letter/QR domain removal. |
+| Resolution | `composer why bacon/bacon-qr-code` → **transitive** via `laravel/fortify` (2FA QR). **Kept.** Not a direct require. |
 | Phase 0B | Not changed |
 | Phase 0C-A | Not changed |
+| Phase 0C-B | Kept |
 
 ## 12. Remaining Laravel / Jetstream placeholder branding
 
 | Field | Content |
 |---|---|
-| Priority | **P2** |
-| Issue | `VITE_APP_NAME` / `APP_NAME` default “Laravel”; `Components/Welcome.vue` Jetstream marketing copy; Inertia title fallback. Phase 0A already replaced PresbiApp/GoldenApp chrome with “AB2TI 2.0”. |
-| Evidence | `.env.example`, `resources/js/app.js`, `resources/js/ssr.js`, `Components/Welcome.vue` |
-| Risk | Public/admin chrome still says Laravel if env is default |
-| Recommended phase | 0C copy/env example, or first branding pass |
-| Decision needed | Official public site name string |
+| Priority | **RESOLVED** (0C-B) for application chrome defaults |
+| Issue | Default app name / Inertia title fallback said “Laravel”; unused Jetstream Welcome component had marketing copy. |
+| Resolution | `.env.example` `APP_NAME="AB2TI 2.0"`; `config/app.php` default; Inertia title fallbacks; `app.blade.php`; unused `Welcome.vue` heading/intro. No UI redesign. README remains Laravel skeleton (not app chrome). |
 | Phase 0B | Not changed |
 | Phase 0C-A | Not changed |
+| Phase 0C-B | Application identity defaults updated |
 
 ---
 
@@ -177,27 +170,20 @@ Priority key:
 
 These were confirmed in the Architecture Baseline and SHOULD be handled with the numbered items, not forgotten:
 
-- ACL vs nav permission name drift (`files.view` vs `media.view`, `settings.view` vs `access settings`) — **aligned in 0C-A** to `media.view` / `cms.view` / auth-only profile. `access settings` still unused.
-- `ExampleTest` GET `/` — **resolved in 0C-A** (`RefreshDatabase`).
-- `HandleInertiaRequests` dotted `auth.user.roles` keys — still open (**P2**).
-- Dual Jetstream vs Base button/modal families — **P2** with item 10.
-- Tailwind v3 vs unused `@tailwindcss/vite` v4 — **P2** with remaining item 8/11 work.
-- `composer setup` runs `migrate --force` — operational hazard; never run unasked.
+- ACL vs nav permission name drift — **aligned in 0C-A**. `access settings` still unused (**P2**, not a foundation blocker).
+- `ExampleTest` GET `/` — **resolved in 0C-A**.
+- `HandleInertiaRequests` dotted `auth.user.roles` keys — still open (**P2**, Jetstream also shares `auth.user`).
+- Dual Jetstream vs Base button/modal families — **P2** with unused Base candidates; not a foundation blocker.
+- Tailwind v3 vs `@tailwindcss/vite` v4 — **removed unused package in 0C-B**.
+- `composer setup` `--force` — **removed in 0C-B**.
 
 ---
 
-## Recommended Phase 0C-B order (remaining Foundation Hardening)
+## Remaining after Phase 0C-B (intentional deferrals)
 
-0C-A completed items 3, 4 (registration), 6, 8 (npm script), and ExampleTest isolation.
+Foundation hardening 0C-A + 0C-B is complete. Remaining items need Phase 1 product/IA knowledge:
 
-1. **Catch-all slug constraint** and reserved paths (item 5).
-2. **Hero media collection** fix (item 7).
-3. **Document leftover-table procedure** for dirty developer DBs (item 9) — no silent DROP.
-4. **Unused ACL groups** `culture.*` / `artikel.*` (item 2) if still unused.
-5. **Dependency audit** bacon-qr-code (item 11); Tailwind vite plugin mismatch.
-6. **Branding/env example** (item 12).
-7. **IA decision ticket** for `/sermons` `/events` (item 1) — do not rename until decided.
-8. **Unused Base components** stay until a real use case (item 10).
-9. **MustVerifyEmail** remains deferred until a product decision.
-
-Product/IA decisions (verification, public URLs) MUST be recorded as ADRs when made.
+1. `/sermons` and `/events` information architecture.
+2. `MustVerifyEmail` product decision (feature flag is off; do not implement until decided).
+3. `BaseSearchSelect` / `DashboardStatCard` — wait for a real AB2TI use case.
+4. Optional later: `access settings` unused permission, dotted Inertia auth keys, Jetstream vs Base component duplication, Laravel skeleton README.
