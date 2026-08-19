@@ -1,0 +1,28 @@
+---
+description: Mandatory database safety — no migrate:fresh, DROP, or developer-data deletion unless explicitly instructed
+globs: database/**/*.php,app/Models/**/*.php,config/database.php
+alwaysApply: false
+---
+
+# Database safety
+
+Follow `docs/project/CONSTITUTION.md` §5. Canonical schema = `database/migrations`, **not** whatever is in a developer database.
+
+Developer DBs MAY still contain leftover church tables whose migrations were removed. Strategy is Foundation Backlog item 9. Do not “clean them up” as a side effect.
+
+## MUST NOT (unless the user explicitly instructs it for a disposable environment)
+
+- `php artisan migrate:fresh`, `db:wipe`, `migrate:refresh`, `migrate:reset`
+- `DROP DATABASE` / `DROP TABLE` (including leftover church tables)
+- `migrate:rollback` of applied history, unconstrained `TRUNCATE` / `DELETE FROM`
+- Editing an already-applied migration to change history
+- Deleting developer data as ordinary feature work
+- Pointing `.env` at a throwaway DB in a way that wipes the active development database
+
+## MUST
+
+- New schema → **new** migration files. Destructive changes require explicit review in the plan.
+- Distinguish data migrations from schema migrations when both are needed.
+- Prefer reversible `down()` where technically safe. Consider running-app compatibility.
+- Validate risky migrations on an **isolated** SQLite file (or equivalent), without modifying the active development DB.
+- Do not run `composer setup` unasked (`migrate --force` + broken `npm run build`).

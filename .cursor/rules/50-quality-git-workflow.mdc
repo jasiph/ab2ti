@@ -1,0 +1,28 @@
+---
+description: Validation, honest test reporting, scoped commits, and Git safety (no push/force/history rewrite)
+globs: tests/**/*.php,phpunit.xml,composer.json,package.json,.gitignore
+alwaysApply: false
+---
+
+# Quality and Git
+
+Follow `docs/project/CONSTITUTION.md` §§14–18, 20. Definition of Done is in §18.
+
+## Validate with commands that exist
+
+- `php artisan test` or `composer test`
+- `php artisan route:list` after route changes
+- `npx vite build` after frontend changes — **not** `npm run build`
+- Isolated sqlite migrate for migration-risk work only
+
+Do not invent scripts. Pint MAY run (`vendor/bin/pint`); there is no `pint.json`. No ESLint/Prettier.
+
+Existing failures MUST be reported honestly (FileManager restore/forceDelete; `ExampleTest` GET `/`). Do not delete or hollow out tests to go green.
+
+A Vue page rendering is not done. New mutating/admin endpoints need server-side authz, validation, and tests.
+
+## Git
+
+This repo already exists — never `git init`. Work on purpose-specific branches (`feat/`, `fix/`, `chore/`, `docs/`, `refactor/`, `test/`). Inspect `git status` and `git diff` before commit. Keep commits scoped; do not mix unrelated work.
+
+**Never push, force-push, skip hooks, or rewrite shared history** unless the user explicitly instructs it. Never commit `.env` or secrets. Do not create exploratory commits.

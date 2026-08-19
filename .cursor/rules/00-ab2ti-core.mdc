@@ -1,0 +1,24 @@
+---
+description: AB2TI 2.0 core identity, Constitution authority, inspect-plan-implement, and safety defaults
+alwaysApply: true
+---
+
+# AB2TI 2.0 Core
+
+Canonical policy: `docs/project/CONSTITUTION.md` (v1.0). Current reality: `docs/project/ARCHITECTURE_BASELINE.md`. Residual work: `docs/project/FOUNDATION_BACKLOG.md`. ADRs: `docs/project/decisions/`.
+
+If a task would violate the Constitution, **stop and report the conflict**. Do not silently override it.
+
+## Identity
+
+AB2TI 2.0 is a new business app on the cleaned Laravel/Inertia/Vue kernel. Legacy Presbi/church domain (congregations, jemaat, church letters, songs, church archives, jemaat import) is **not** part of AB2TI. Do not resurrect it.
+
+## Protocol
+
+Non-trivial work: **Inspect → Plan → Implement → Validate → Report**. Read existing code before changing architecture. Do not invent modules, tables, permissions, routes, or layers for convenience. Prefer existing conventions unless an ADR changes them. Do not expand one task into unrelated cleanup.
+
+## Scope and safety
+
+Stay in the stated scope. Report out-of-scope findings. Do not run destructive Git, database, or deploy operations unless explicitly instructed. **Never push** unless the user explicitly asks. Never `git init` this repo. Never rewrite shared history without explicit instruction.
+
+Do not implement AB2TI business features, redesign UI, or modify the active development database unless the current task explicitly requires it.

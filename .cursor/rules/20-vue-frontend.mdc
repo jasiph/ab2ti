@@ -1,0 +1,29 @@
+---
+description: AB2TI Vue 3 / Inertia / Tailwind frontend conventions and layout/theme rules
+globs: resources/js/**/*.vue,resources/js/**/*.js,resources/css/**/*.css,vite.config.js,tailwind.config.js
+alwaysApply: false
+---
+
+# Vue / Inertia frontend
+
+Follow `docs/project/CONSTITUTION.md` §§9–11. Facts: `docs/project/ARCHITECTURE_BASELINE.md`.
+
+## Stack as it exists
+
+Vue 3 `<script setup>` (JavaScript, not TypeScript), Inertia 2, Tailwind 3 utilities, Ziggy `route()`, `trans()` / `$t()` from `laravel-vue-i18n`. No Pinia. No ESLint/Prettier.
+
+## Layouts and theme
+
+- Admin pages: `AppLayout`. Public pages: `FrontendLayout`. Auth: existing Fortify cards.
+- Do not introduce a new layout family without an ADR. Do not restyle by inventing a page-local palette; use tokens (`primary`, `surface`, `text-main`, `border`) from `tailwind.config.js` / `app.css`.
+- Prefer in-use `Components/Base/*` (`BaseButton`, `BaseCard`, `BaseInput`, `BaseSelect`, `BaseList`, `BaseModal`, `BasePagination`). **Do not** promote unused `BaseSearchSelect` or `DashboardStatCard` to the design system. Do not add another button/modal family beside Jetstream leftovers unless the task is UI consolidation.
+
+## Pages and forms
+
+Pages compose features. Shared UI goes in `Components/`; shared logic in `Composables/`. Use Inertia `useForm` and show server `errors`. Client checks are UX only.
+
+`usePermission` / `useNavigation` hide menus. That is **not** authorization.
+
+New UI: loading/error states for mutations, existing `sm`/`md`/`lg` breakpoints, keep `sr-only` / `aria-*`. User-facing strings go through `lang/{locale}/sources` + `lang:merge`, not page-local maps.
+
+After Vue/CSS changes, validate with `npx vite build`. Do **not** rely on `npm run build` (broken script; Foundation Backlog).

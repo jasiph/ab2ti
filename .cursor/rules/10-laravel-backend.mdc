@@ -1,0 +1,22 @@
+---
+description: AB2TI Laravel backend conventions (controllers, routes, models, i18n merge, no extra layers)
+globs: app/**/*.php,routes/**/*.php,bootstrap/**/*.php,config/**/*.php
+alwaysApply: false
+---
+
+# Laravel backend
+
+Follow `docs/project/CONSTITUTION.md` §§6–8, 11–12. Facts: `docs/project/ARCHITECTURE_BASELINE.md`.
+
+## Pattern
+
+Current shape: **route → Admin/Page controller → `$request->validate()` → Eloquent + Spatie Media → `Inertia::render()`**. There are no Form Requests, Policies, or `app/Services`. Do not add repository/service/enum layers unless an ADR says so.
+
+- Admin HTTP: `App\Http\Controllers\Admin`, route names `admin.*`, URLs under `/admin`.
+- Public CMS: `PageController` + named aliases. Catch-all `GET /{slug}` (`pages.show`) MUST stay last. Register explicit routes **above** it.
+- Do not rename `/sermons` or `/events` without an IA ADR.
+- Models: `User`, `Page`, `BlockTemplate`, `Hero`, `WelcomeSection`, `File`. Keep `$fillable`. Use transactions for multi-step writes (Page/Hero already do).
+- Permissions live in `config/acl.php` and `php artisan acl:sync`. Do not invent Vue-only permission strings. Do not silently change Fortify/Jetstream flags, registration, or `MustVerifyEmail`.
+- i18n: edit `lang/{locale}/sources/*.json`, then `php artisan lang:merge {locale}` (`id` and `en`). Do not add a second translation system.
+- File Manager is platform infrastructure; do not merge it with future domain documents without an ADR.
+- Do not add Composer packages to avoid a small amount of Laravel-native code. Do not remove leftover `bacon/bacon-qr-code` unless the task is that dependency audit.
