@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Security and authorization
 
-Follow `docs/project/CONSTITUTION.md` §§7, 13. Current gap (do not pretend it is fixed): admin routes are `auth` + `verified` only; Spatie checks in Vue hide menus. See Foundation Backlog items 3 and 4.
+Follow `docs/project/CONSTITUTION.md` §§7, 13. Admin `/admin/*` routes use Spatie `permission:` middleware from `config/acl.php`. Vue `usePermission` / `useNavigation` remain UX only. See Foundation Backlog for unused ACL groups and deferred `MustVerifyEmail`.
 
 ## Non-negotiable
 

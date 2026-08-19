@@ -1,16 +1,23 @@
 <?php
 
+use App\Http\Controllers\Admin\BlockTemplateController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FileManagerController;
+use App\Http\Controllers\Admin\HeroController;
+use App\Http\Controllers\Admin\PageController as AdminPageController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\WelcomeSectionController;
+use App\Http\Controllers\PageController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Session;
+use Inertia\Inertia;
 
-//language switch
+// language switch
 Route::get('/language/{language}', function ($language) {
     // Validasi input agar hanya 'id' atau 'en' yang diterima
-    if (!in_array($language, ['en', 'id'])) {
+    if (! in_array($language, ['en', 'id'])) {
         abort(400);
     }
     // Simpan ke session
@@ -35,8 +42,8 @@ Route::get('/', function () {
                 return $media->getUrl('large');
             }
             )->values(),
-            ];
-        }
+        ];
+    }
 
     $welcome = \App\Models\WelcomeSection::query()
         ->active()
@@ -67,60 +74,108 @@ Route::get('/', function () {
 
 // Frontend CMS shortcuts (mapped to dynamic pages)
 Route::get('/about', function () {
-    return app(\App\Http\Controllers\PageController::class)->show('about');
+    return app(PageController::class)->show('about');
 })->name('about');
 Route::get('/sermons', function () {
-    return app(\App\Http\Controllers\PageController::class)->show('sermons');
+    return app(PageController::class)->show('sermons');
 })->name('sermons');
 Route::get('/events', function () {
-    return app(\App\Http\Controllers\PageController::class)->show('events');
+    return app(PageController::class)->show('events');
 })->name('events');
 Route::get('/contact', function () {
-    return app(\App\Http\Controllers\PageController::class)->show('contact');
+    return app(PageController::class)->show('contact');
 })->name('contact');
 
-Route::middleware([
+$authenticate = [
     'auth:sanctum',
     config('jetstream.auth_session'),
-    'verified',
-])->group(function () {
-    Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class , 'index'])->name('dashboard');
+];
+
+Route::middleware($authenticate)->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
-Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified',
-])->prefix('admin') // URL: /admin/users
-    ->name('admin.') // Route Name: admin.users.index
+Route::middleware($authenticate)
+    ->prefix('admin')
+    ->name('admin.')
     ->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class , 'index'])->name('dashboard');
+        Route::middleware('permission:users.view')->group(function () {
+            Route::resource('users', UserController::class)->only(['index', 'show']);
+        });
+        Route::middleware('permission:users.create')->group(function () {
+            Route::resource('users', UserController::class)->only(['create', 'store']);
+        });
+        Route::middleware('permission:users.update')->group(function () {
+            Route::resource('users', UserController::class)->only(['edit', 'update']);
+        });
+        Route::middleware('permission:users.delete')->group(function () {
+            Route::resource('users', UserController::class)->only(['destroy']);
+        });
 
-        // User Management Routes
-        Route::resource('users', UserController::class);
-        Route::resource('roles', RoleController::class);
+        Route::middleware('permission:roles.manage')->group(function () {
+            Route::resource('roles', RoleController::class);
+        });
 
-        // File Manager
-        Route::get('files/json', [\App\Http\Controllers\Admin\FileManagerController::class , 'getJson'])->name('files.json');
-        Route::post('files/upload-json', [\App\Http\Controllers\Admin\FileManagerController::class , 'storeJson'])->name('files.upload-json');
-        Route::post('files/{file}/restore', [\App\Http\Controllers\Admin\FileManagerController::class , 'restore'])->name('files.restore');
-        Route::delete('files/{file}/force', [\App\Http\Controllers\Admin\FileManagerController::class , 'forceDelete'])->name('files.force-delete');
-        Route::resource('files', \App\Http\Controllers\Admin\FileManagerController::class);
+        Route::middleware('permission:media.view')->group(function () {
+            Route::get('files/json', [FileManagerController::class, 'getJson'])->name('files.json');
+            Route::resource('files', FileManagerController::class)->only(['index', 'show']);
+        });
+        Route::middleware('permission:media.create')->group(function () {
+            Route::post('files/upload-json', [FileManagerController::class, 'storeJson'])->name('files.upload-json');
+            Route::resource('files', FileManagerController::class)->only(['create', 'store']);
+        });
+        Route::middleware('permission:media.update')->group(function () {
+            Route::post('files/{file}/restore', [FileManagerController::class, 'restore'])
+                ->whereNumber('file')
+                ->name('files.restore');
+            Route::resource('files', FileManagerController::class)->only(['edit', 'update']);
+        });
+        Route::middleware('permission:media.delete')->group(function () {
+            Route::delete('files/{file}/force', [FileManagerController::class, 'forceDelete'])
+                ->whereNumber('file')
+                ->name('files.force-delete');
+            Route::resource('files', FileManagerController::class)->only(['destroy']);
+        });
 
-        // Hero Management
-        Route::resource('heroes', \App\Http\Controllers\Admin\HeroController::class);
+        Route::middleware('permission:heroes.view')->group(function () {
+            Route::resource('heroes', HeroController::class)->only(['index', 'show']);
+        });
+        Route::middleware('permission:heroes.create')->group(function () {
+            Route::resource('heroes', HeroController::class)->only(['create', 'store']);
+        });
+        Route::middleware('permission:heroes.update')->group(function () {
+            Route::resource('heroes', HeroController::class)->only(['edit', 'update']);
+        });
+        Route::middleware('permission:heroes.delete')->group(function () {
+            Route::resource('heroes', HeroController::class)->only(['destroy']);
+        });
 
-        Route::get('welcome-section', [\App\Http\Controllers\Admin\WelcomeSectionController::class, 'edit'])->name('welcome-section.edit');
-        Route::put('welcome-section', [\App\Http\Controllers\Admin\WelcomeSectionController::class, 'update'])->name('welcome-section.update');
-        Route::resource('pages', \App\Http\Controllers\Admin\PageController::class);
-        Route::patch('/pages/{page}/toggle', [\App\Http\Controllers\Admin\PageController::class, 'toggle'])->name('pages.toggle');
-        Route::get('/block-templates/active', [\App\Http\Controllers\Admin\BlockTemplateController::class, 'getActiveBlocks'])->name('block-templates.active');
-        Route::resource('block-templates', \App\Http\Controllers\Admin\BlockTemplateController::class);
-        Route::patch('/block-templates/{block_template}/toggle', [\App\Http\Controllers\Admin\BlockTemplateController::class, 'toggle'])->name('block-templates.toggle');
+        Route::middleware('permission:cms.view')->group(function () {
+            Route::get('welcome-section', [WelcomeSectionController::class, 'edit'])->name('welcome-section.edit');
+            Route::get('block-templates/active', [BlockTemplateController::class, 'getActiveBlocks'])->name('block-templates.active');
+            Route::resource('pages', AdminPageController::class)->only(['index', 'show']);
+            Route::resource('block-templates', BlockTemplateController::class)->only(['index', 'show']);
+        });
+        Route::middleware('permission:cms.create')->group(function () {
+            Route::resource('pages', AdminPageController::class)->only(['create', 'store']);
+            Route::resource('block-templates', BlockTemplateController::class)->only(['create', 'store']);
+        });
+        Route::middleware('permission:cms.update')->group(function () {
+            Route::put('welcome-section', [WelcomeSectionController::class, 'update'])->name('welcome-section.update');
+            Route::patch('pages/{page}/toggle', [AdminPageController::class, 'toggle'])->name('pages.toggle');
+            Route::patch('block-templates/{block_template}/toggle', [BlockTemplateController::class, 'toggle'])->name('block-templates.toggle');
+            Route::resource('pages', AdminPageController::class)->only(['edit', 'update']);
+            Route::resource('block-templates', BlockTemplateController::class)->only(['edit', 'update']);
+        });
+        Route::middleware('permission:cms.delete')->group(function () {
+            Route::resource('pages', AdminPageController::class)->only(['destroy']);
+            Route::resource('block-templates', BlockTemplateController::class)->only(['destroy']);
+        });
     });
 
 // Frontend CMS catch-all route (keep at bottom to avoid conflicts)
-Route::get('/{slug}', [\App\Http\Controllers\PageController::class, 'show'])
+Route::get('/{slug}', [PageController::class, 'show'])
     ->where('slug', '.*')
     ->name('pages.show');
