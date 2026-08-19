@@ -28,20 +28,12 @@ return [
             'access settings',
         ],
 
-        // Group: Culture / Budaya
-        'culture' => [
-            'culture.view',
-            'culture.create',
-            'culture.update',
-            'culture.delete'
-        ],
-
         // Group: Media Library
         'media' => [
             'media.view',
             'media.create',
             'media.update',
-            'media.delete'
+            'media.delete',
         ],
 
         // Group: Media Library
@@ -49,15 +41,7 @@ return [
             'heroes.view',
             'heroes.create',
             'heroes.update',
-            'heroes.delete'
-        ],
-
-        // Group: Artikel
-        'artikel' => [
-            'artikel.view',
-            'artikel.create',
-            'artikel.update',
-            'artikel.delete'
+            'heroes.delete',
         ],
     ],
 ];
