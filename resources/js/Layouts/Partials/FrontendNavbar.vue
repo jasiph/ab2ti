@@ -82,6 +82,7 @@ const page = usePage();
                             {{ $t("Log in") }}
                         </Link>
                         <Link
+                            v-if="page.props.canRegister"
                             :href="route('register')"
                             class="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition"
                         >

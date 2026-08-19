@@ -36,23 +36,24 @@ class HandleInertiaRequests extends Middleware
             'locale' => app()->getLocale(),
             // Definisi Flash Message Global
             'flash' => [
-                'success' => fn() => $request->session()->get('success'),
-                'error' => fn() => $request->session()->get('error'),
-                'warning' => fn() => $request->session()->get('warning'),
-                'info' => fn() => $request->session()->get('info'),
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+                'warning' => fn () => $request->session()->get('warning'),
+                'info' => fn () => $request->session()->get('info'),
             ],
             // TAMBAHKAN INI: Auth User Permissions & Roles
-            'auth.user.roles' => fn() => $request->user()
+            'auth.user.roles' => fn () => $request->user()
                 ? $request->user()->getRoleNames()
                 : [],
 
-            'auth.user.permissions' => fn() => $request->user()
+            'auth.user.permissions' => fn () => $request->user()
                 ? $request->user()->getAllPermissions()->pluck('name')
                 : [],
-            'ziggy' => fn() => [
+            'ziggy' => fn () => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
+            'canRegister' => fn () => \Illuminate\Support\Facades\Route::has('register'),
         ];
     }
 }

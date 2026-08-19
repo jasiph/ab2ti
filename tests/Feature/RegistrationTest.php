@@ -31,6 +31,20 @@ class RegistrationTest extends TestCase
         $response = $this->get('/register');
 
         $response->assertStatus(404);
+
+        $post = $this->post('/register', [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+            'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature(),
+        ]);
+
+        // Fortify no longer registers POST /register. The CMS GET catch-all
+        // occupies /{slug}, so POST may be 405 rather than 404.
+        $this->assertTrue(in_array($post->status(), [404, 405], true));
+        $this->assertGuest();
+        $this->assertDatabaseMissing('users', ['email' => 'test@example.com']);
     }
 
     public function test_new_users_can_register(): void

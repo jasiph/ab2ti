@@ -110,7 +110,10 @@ const showingMobileSidebar = ref(false); // Sidebar menu
                                     class="text-sm font-medium text-text-muted hover:text-text-main"
                                     >Log in</Link
                                 >
-                                <BaseButton :href="route('register')" size="sm"
+                                <BaseButton
+                                    v-if="page.props.canRegister"
+                                    :href="route('register')"
+                                    size="sm"
                                     >Get Started</BaseButton
                                 >
                             </div>
@@ -177,6 +180,7 @@ const showingMobileSidebar = ref(false); // Sidebar menu
                             >Log in</BaseButton
                         >
                         <BaseButton
+                            v-if="page.props.canRegister"
                             :href="route('register')"
                             variant="primary"
                             class="w-full justify-center"

@@ -5,9 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\File;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-
-
 
 class FileManagerController extends Controller
 {
@@ -17,6 +16,7 @@ class FileManagerController extends Controller
 
         $files->getCollection()->transform(function ($file) {
             $media = $file->getFirstMedia('default');
+
             return [
                 'id' => $file->id,
                 'name' => $file->name ?? $media?->file_name,
@@ -63,6 +63,7 @@ class FileManagerController extends Controller
     {
         $file = File::findOrFail($id);
         $file->delete(); // soft-delete
+
         return response()->json([
             'success' => true,
             'message' => 'File deleted.',
@@ -113,6 +114,7 @@ class FileManagerController extends Controller
 
         $files->getCollection()->transform(function ($file) {
             $media = $file->getFirstMedia('default');
+
             return [
                 'id' => $file->id,
                 'name' => $file->name ?? $media?->file_name,
@@ -127,5 +129,30 @@ class FileManagerController extends Controller
         });
 
         return response()->json($files);
+    }
+
+    public function restore(int $file)
+    {
+        $record = File::onlyTrashed()->findOrFail($file);
+        $record->restore();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'File restored.',
+        ]);
+    }
+
+    public function forceDelete(int $file)
+    {
+        $record = File::onlyTrashed()->findOrFail($file);
+
+        DB::transaction(function () use ($record): void {
+            $record->forceDelete();
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'File permanently deleted.',
+        ]);
     }
 }

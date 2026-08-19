@@ -21,7 +21,7 @@ const props = defineProps({
     },
     ctaLink: {
         type: String,
-        default: '/register'
+        default: '/login'
     },
     backgroundImage: {
         type: String,
