@@ -32,7 +32,7 @@ const href = computed(() => {
         class="bg-surface-variant w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between h-10 border-b border-border text-xs"
     >
         <div class="flex items-center space-x-4 text-text-muted">
-            <span class="font-bold text-primary">PresbiApp v1.0</span>
+            <span class="font-bold text-primary">AB2TI 2.0</span>
             <span class="hidden sm:inline">Support</span>
             <span class="hidden sm:inline">Docs</span>
         </div>

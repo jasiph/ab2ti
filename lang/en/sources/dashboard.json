@@ -1,16 +1,4 @@
 {
     "Dashboard": "Dashboard",
-    "Total Congregation": "Total Congregation",
-    "Head of Families": "Head of Families",
-    "Pending Letters": "Pending Letters",
-    "Total Documents": "Total Documents",
-    "Total Songs": "Total Songs",
-    "Newest Members": "Newest Members",
-    "View All": "View All",
-    "Upcoming Birthdays": "Upcoming Birthdays",
-    "No upcoming birthdays this month.": "No upcoming birthdays this month.",
-    "Add Member": "Add Member",
-    "Create Letter": "Create Letter",
-    "Add Song": "Add Song",
-    "Upload Document": "Upload Document"
+    "View All": "View All"
 }

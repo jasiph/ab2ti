@@ -1,16 +1,4 @@
 {
     "Dashboard": "Dasbor",
-    "Total Congregation": "Total Jemaat",
-    "Head of Families": "Kepala Keluarga",
-    "Pending Letters": "Surat Tertunda",
-    "Total Documents": "Total Dokumen",
-    "Total Songs": "Total Lagu",
-    "Newest Members": "Anggota Terbaru",
-    "View All": "Lihat Semua",
-    "This Month Birthdays": "Ulang Tahun Bulan Ini",
-    "No upcoming birthdays this month.": "Tidak ada ulang tahun bulan ini.",
-    "Add Member": "Tambah Anggota",
-    "Create Letter": "Buat Surat",
-    "Add Song": "Tambah Lagu",
-    "Upload Document": "Unggah Dokumen"
+    "View All": "Lihat Semua"
 }

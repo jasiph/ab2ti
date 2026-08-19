@@ -118,24 +118,7 @@ Route::middleware([
         Route::get('/block-templates/active', [\App\Http\Controllers\Admin\BlockTemplateController::class, 'getActiveBlocks'])->name('block-templates.active');
         Route::resource('block-templates', \App\Http\Controllers\Admin\BlockTemplateController::class);
         Route::patch('/block-templates/{block_template}/toggle', [\App\Http\Controllers\Admin\BlockTemplateController::class, 'toggle'])->name('block-templates.toggle');
-
-        // Song Management
-        Route::resource('songs', \App\Http\Controllers\Admin\SongController::class);
-        Route::resource('song-categories', \App\Http\Controllers\Admin\SongCategoryController::class)->except(['create', 'edit', 'show']);
-
-        // Church Administration
-        Route::get('congregations/birthdays', [\App\Http\Controllers\Admin\CongregationController::class , 'upcomingBirthdays'])->name('congregations.birthdays');
-        Route::get('congregations/search', [\App\Http\Controllers\Admin\CongregationController::class , 'apiSearch'])->name('congregations.api.search');
-        Route::resource('congregations', \App\Http\Controllers\Admin\CongregationController::class);
-        Route::resource('letter-templates', \App\Http\Controllers\Admin\LetterTemplateController::class);
-        Route::resource('documents', \App\Http\Controllers\Admin\DocumentController::class);
-        Route::resource('letters', \App\Http\Controllers\Admin\LetterController::class);
-        Route::post('letters/{letter}/approve', [\App\Http\Controllers\Admin\LetterController::class , 'approve'])->name('letters.approve');
-        Route::get('letters/{letter}/print', [\App\Http\Controllers\Admin\LetterController::class , 'print'])->name('letters.print');
     });
-
-// Public Verification
-Route::get('/verify/doc/{letter}', [\App\Http\Controllers\Admin\LetterController::class , 'verify'])->name('letter.verify');
 
 // Frontend CMS catch-all route (keep at bottom to avoid conflicts)
 Route::get('/{slug}', [\App\Http\Controllers\PageController::class, 'show'])

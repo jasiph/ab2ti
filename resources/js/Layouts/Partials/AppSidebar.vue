@@ -58,7 +58,7 @@ const toggleMenu = (label) => {
                 <div class="flex-shrink-0 flex items-center px-4 mb-5">
                     <ApplicationMark class="block h-8 w-auto fill-primary" />
                     <span class="ml-2 font-bold text-lg text-text-main"
-                        >GoldenApp</span
+                        >AB2TI 2.0</span>
                     >
                 </div>
 

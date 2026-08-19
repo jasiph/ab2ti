@@ -52,19 +52,6 @@ return [
             'heroes.delete'
         ],
 
-        // Group: Song Catalog
-        'songs' => [
-            'songs.view',
-            'songs.create',
-            'songs.update',
-            'songs.delete',
-            // Categories
-            'song_categories.view',
-            'song_categories.create',
-            'song_categories.update',
-            'song_categories.delete',
-        ],
-
         // Group: Artikel
         'artikel' => [
             'artikel.view',
@@ -72,21 +59,5 @@ return [
             'artikel.update',
             'artikel.delete'
         ],
-
-        // Group: Congregation Management
-        'congregations' => [
-            'congregations.view',
-            'congregations.create',
-            'congregations.update',
-            'congregations.delete'
-        ],
-
-        // Group: Document Archive
-        'documents' => [
-            'documents.view',
-            'documents.create',
-            'documents.update',
-            'documents.delete'
-        ]
     ],
 ];

@@ -270,7 +270,7 @@ const showingMobileSidebar = ref(false); // Sidebar menu
             <div
                 class="max-w-7xl mx-auto px-4 text-center text-sm text-text-muted"
             >
-                &copy; {{ new Date().getFullYear() }} Golden Starter.
+                &copy; {{ new Date().getFullYear() }} AB2TI 2.0.
             </div>
         </footer>
     </div>

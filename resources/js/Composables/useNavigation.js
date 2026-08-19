@@ -97,63 +97,7 @@ export function useNavigation() {
                 ],
             },
 
-            // 4. SONGS (Song Catalog)
-            {
-                label: trans("Songs"),
-                permission: "songs.view",
-                active: route().current("admin.songs.*") || route().current("admin.song-categories.*"),
-                icon: "M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z",
-                children: [
-                    {
-                        label: trans("Song List"),
-                        route: "admin.songs.index",
-                        permission: "songs.view",
-                        active: route().current("admin.songs.*"),
-                    },
-                    {
-                        label: trans("Song Categories"),
-                        route: "admin.song-categories.index",
-                        permission: "song_categories.view",
-                        active: route().current("admin.song-categories.*"),
-                    },
-                ],
-            },
-
-            // 5. CHURCH ADMIN (Administrasi Gereja)
-            {
-                label: trans("Church Administration"),
-                permission: "letters.view", // Adjust permission
-                active: route().current("admin.letters.*") || route().current("admin.incoming-letters.*") || route().current("admin.letter-templates.*"),
-                icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253",
-                children: [
-                    {
-                        label: trans("Congregation Management"), // Kelola Jemaat
-                        route: "admin.congregations.index",
-                        permission: "congregations.view",
-                        active: route().current("admin.congregations.*"),
-                    },
-                    {
-                        label: trans("Document Admin"), // Administrasi Dokumen
-                        route: "admin.letters.index",
-                        permission: "letters.view",
-                        active: route().current("admin.letters.*"),
-                    },
-                    {
-                        label: trans("Document Archive"), // Arsip Dokumen
-                        route: "admin.documents.index",
-                        permission: "documents.view",
-                        active: route().current("admin.documents.*"),
-                    },
-                    {
-                        label: trans("Templates"), // Template Surat
-                        route: "admin.letter-templates.index",
-                        permission: "letter_templates.view",
-                        active: route().current("admin.letter-templates.*"),
-                    },
-                ],
-            },
-
-            // 6. SETTINGS (System Settings)
+            // 4. SETTINGS (System Settings)
             {
                 label: trans("System Settings"),
                 route: "profile.show", // Contoh saja
