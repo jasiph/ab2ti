@@ -12,7 +12,7 @@ Follow `docs/project/CONSTITUTION.md` §§14–18, 20. Definition of Done is in 
 
 - `php artisan test` or `composer test`
 - `php artisan route:list` after route changes
-- `npx vite build` after frontend changes — **not** `npm run build`
+- `npx vite build` or `npm run build` after frontend changes
 - Isolated sqlite migrate for migration-risk work only
 
 Do not invent scripts. Pint MAY run (`vendor/bin/pint`); there is no `pint.json`. No ESLint/Prettier.

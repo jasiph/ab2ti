@@ -10,7 +10,9 @@ Follow `docs/project/CONSTITUTION.md` §§6–8, 11–12. Facts: `docs/project/A
 
 ## Pattern
 
-Current shape: **route → Admin/Page controller → `$request->validate()` → Eloquent + Spatie Media → `Inertia::render()`**. There are no Form Requests, Policies, or `app/Services`. Do not add repository/service/enum layers unless an ADR says so.
+Current simple CRUD shape: **route → Admin/Page controller → `$request->validate()` → Eloquent + Spatie Media → `Inertia::render()`**. Prefer that for straightforward resources.
+
+That is the starting point, not a requirement to keep fat controllers forever. Do **not** introduce Form Requests, Actions, Services, repositories, or enums speculatively. Those MAY be added when actual complexity, reuse, transactions, or testability justify them. Business logic SHOULD NOT grow indefinitely inside controllers.
 
 - Admin HTTP: `App\Http\Controllers\Admin`, route names `admin.*`, URLs under `/admin`.
 - Public CMS: `PageController` + named aliases. Catch-all `GET /{slug}` (`pages.show`) MUST stay last. Register explicit routes **above** it.

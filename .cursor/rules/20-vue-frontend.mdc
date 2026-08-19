@@ -26,4 +26,4 @@ Pages compose features. Shared UI goes in `Components/`; shared logic in `Compos
 
 New UI: loading/error states for mutations, existing `sm`/`md`/`lg` breakpoints, keep `sr-only` / `aria-*`. User-facing strings go through `lang/{locale}/sources` + `lang:merge`, not page-local maps.
 
-After Vue/CSS changes, validate with `npx vite build`. Do **not** rely on `npm run build` (broken script; Foundation Backlog).
+After Vue/CSS changes, validate with `npm run build` (or `npx vite build`).

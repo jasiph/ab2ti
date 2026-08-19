@@ -1,9 +1,10 @@
 # AB2TI 2.0 Project Constitution
 
-Constitution Version: 1.0
+Constitution Version: 1.1
 Project Stage: Foundation
 Status: Active
 Adopted: 2026-08-19
+Amended: 2026-08-19 (v1.1 — backend pattern clarification; admin authorization current state)
 Source of architecture facts: `docs/project/ARCHITECTURE_BASELINE.md`
 
 This Constitution is the canonical engineering policy for this repository. Cursor Project Rules operationalize it. Rules MUST NOT silently override it.
@@ -108,9 +109,9 @@ Strategy for leftover church tables in developer DBs is a Foundation Backlog ite
 
 ## 6. BACKEND ARCHITECTURE
 
-Current pattern: fat-ish controllers, inline validation, Eloquent models, Inertia responses. There is no Request/Policy/Service directory in use.
+Current simple CRUD pattern: controllers, inline validation, Eloquent models, Inertia responses. There is no Request/Policy/Service directory in use.
 
-Cursor MUST follow that pattern unless an ADR introduces a new one.
+Cursor SHOULD prefer that pattern for straightforward resources. Cursor MUST NOT introduce Form Requests, Actions, Services, repositories, or enums merely for architectural symmetry. Those MAY be introduced when actual complexity, reuse, transactions, or testability justify them. Business logic SHOULD NOT grow indefinitely inside controllers.
 
 ### Controllers
 
@@ -118,7 +119,7 @@ Admin HTTP lives under `App\Http\Controllers\Admin`. Public CMS lives in `App\Ht
 
 ### Validation
 
-Until Form Requests are adopted by ADR, validation MUST remain server-side in the controller (or a subsequently introduced Form Request). Frontend validation is UX only.
+Writes MUST be validated server-side. For simple CRUD, inline `$request->validate()` in the controller is acceptable. Form Requests MAY be extracted when a form is reused or rules become hard to test. Frontend validation is UX only.
 
 ### Models
 
@@ -153,7 +154,7 @@ Authentication and authorization are separate concerns.
 **Frontend menu visibility is not security.**
 `usePermission` / `useNavigation` are UX. Protected operations MUST be authorized **server-side** (policy, `authorize()`, `can:` middleware, or equivalent) before they mutate or return sensitive data.
 
-Current state: admin routes are only `auth` + `verified`. Completing server-side authorization is Foundation Hardening, not an excuse to skip it on new modules.
+Current state: `/admin/*` is protected by `auth` plus Spatie `permission:` middleware mapped from `config/acl.php`. Completing remaining ACL hygiene (unused `culture.*` / `artikel.*`, leftover `access settings`) is Foundation Backlog, not an excuse to skip server-side checks on new modules.
 
 Future AB2TI modules MUST declare their authorization model (which permissions/roles gate which operations) in the implementation plan.
 
@@ -295,7 +296,7 @@ Tests SHOULD cover behavior, authorization, validation, and important edge cases
 
 - `php artisan test` or `composer test`
 - `php artisan route:list` after route changes
-- `npx vite build` after Vue/page/component changes (do **not** rely on `npm run build`)
+- `npx vite build` / `npm run build` after Vue/page/component changes
 - Isolated `DB_CONNECTION=sqlite DB_DATABASE=/tmp/...sqlite php artisan migrate --force` for migration-risk work
 
 Do not invent npm/composer scripts. Laravel Pint MAY be used if already installed (`vendor/bin/pint`); there is no project `pint.json`. There is no ESLint/Prettier pipeline.

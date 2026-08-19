@@ -4,7 +4,7 @@ This document describes **current reality** after Phase 0A (legacy Presbi/church
 
 Captured from repository inspection on 2026-08-19.
 
-Source commit: `09a69e691bc646405e21f1f4c4fb35876cffef27`
+Source commit: `47a3c3b2a03c1edc407a132a231f014cf1768829` (governance). Hardening 0C-A updates authorization, registration, File Manager, tests, and `npm run build` on top of that baseline.
 
 ---
 
@@ -79,9 +79,10 @@ Admin controllers are resource-style CRUD. There is no domain service/action lay
 ## Authentication
 
 - **Fortify** guard `web`; Jetstream stack `inertia`; Jetstream guard `sanctum`.
-- Features enabled: registration, password reset, email verification (Fortify feature flag), profile/password update, two-factor authentication, API tokens, account deletion.
-- Features disabled: Jetstream teams, Jetstream profile photos, terms/privacy feature flag.
-- `User` does **not** implement `MustVerifyEmail` (commented import). Admin/dashboard routes use middleware `verified`, which is a no-op unless the user implements `MustVerifyEmail`.
+- Features enabled: password reset, email verification (Fortify feature flag only), profile/password update, two-factor authentication, API tokens, account deletion.
+- **Public self-registration is disabled** (`Features::registration()` is not listed). See ADR `0002-disable-public-registration.md`.
+- Features disabled: Jetstream teams, Jetstream profile photos, terms/privacy feature flag, **Fortify registration**.
+- `User` does **not** implement `MustVerifyEmail` (commented import). Admin/dashboard routes no longer use the no-op `verified` middleware. Email verification remains deferred.
 - Login rate limit: 5/minute (Fortify).
 - Session driver in `.env.example`: database; `SESSION_ENCRYPT=false`.
 
@@ -97,9 +98,13 @@ Current groups: `users`, `roles`, `cms`, `settings`, `culture`, `media`, `heroes
 
 `Gate::before` grants every ability to role `super-admin`.
 
-**Limitation (verified):** `/admin/*` is protected by `auth:sanctum` + Jetstream session + `verified` only. Controllers do not call policies or `$this->authorize()`. Vue `usePermission` / `useNavigation` hide menus. **Authorization is primarily UI visibility, not server-side enforcement.**
+**Phase 0C-A:** `/admin/*` mutating and module-read routes use Spatie `permission:` middleware (aliases registered in `bootstrap/app.php`). Guests are redirected to login by `auth:sanctum`. Authenticated users without the mapped permission receive HTTP 403. Dashboard (`/dashboard` and `/admin/dashboard`) remains **auth-only** (no module permission).
 
-Additional drift: navigation uses permission names that are not in `acl.php` (`files.view`, `settings.view`). ACL has `media.view` and `access settings`. `culture.*` and `artikel.*` have no corresponding modules.
+Vue `usePermission` / `useNavigation` still hide menus (UX only). Navigation permission names were aligned to ACL: File Manager uses `media.view`; Pages/Block Templates use `cms.view`. Jetstream `profile.show` is not gated by `access settings`.
+
+Still unused: `culture.*`, `artikel.*`, `access settings`.
+
+Do **not** run `acl:sync` against the active development database as a side effect of feature work. Tests seed permissions on the in-memory SQLite test database.
 
 ---
 
@@ -171,8 +176,9 @@ There is no posts/news/tags/menu CMS, no scheduling, no draft workflow beyond `i
 
 - `files` table + Spatie `media` (polymorphic).
 - `File` model: collection `default`, conversion `thumb` (300×300, non-queued), soft deletes.
-- `FileManagerController`: index/create/store/destroy/getJson/storeJson.
-- Routes exist for `restore` and `forceDelete`; **controller methods are missing**. Tests covering those methods fail.
+- `FileManagerController`: index/create/store/destroy/getJson/storeJson/**restore**/**forceDelete**.
+- Restore: `File::onlyTrashed()->findOrFail` then `restore()`. Media is retained on soft-delete and is not duplicated.
+- Force-delete: only **trashed** records; `forceDelete()` inside a transaction so Spatie removes related `media` rows/files.
 - `store()` accepts any file up to 20MB; `storeJson()` restricts image MIME types.
 - Disks: Laravel `public` (linked) and `local` (`storage/app/private`). S3 is configured but unused by default.
 - Image compression happens in Vue before upload.
@@ -222,23 +228,21 @@ PHPUnit 11 (`phpunit.xml`): Unit + Feature suites. In-memory SQLite for tests.
 
 Present:
 
-- Jetstream/Fortify feature tests (auth, profile, password, 2FA, API tokens, registration, browser sessions, account deletion)
+- Jetstream/Fortify feature tests (auth, profile, password, 2FA, API tokens, registration disabled, browser sessions, account deletion)
 - `tests/Feature/Admin/FileManagerTest.php`
-- Placeholder `ExampleTest` (unit + feature GET `/`)
+- `tests/Feature/Admin/AdminAuthorizationTest.php`
+- Placeholder `ExampleTest` (unit + feature GET `/` with `RefreshDatabase`)
 
-Known failures (Phase 0A, pre-existing relative to this governance phase):
+Known failures (Phase 0A, **resolved in Phase 0C-A**):
 
-1. `FileManagerTest` restore / force-delete — missing controller methods.
-2. `ExampleTest` GET `/` — no `RefreshDatabase`; query hits `heroes` on empty in-memory DB.
-
-No Pest. No frontend/browser tests. No CMS/authorization tests.
+1. FileManager restore / force-delete — implemented; tests pass on the in-memory SQLite suite.
+2. `ExampleTest` GET `/` — uses `RefreshDatabase` so `heroes` exists.
 
 Quality commands that actually exist:
 
 - `composer test` → `php artisan config:clear` + `php artisan test`
 - `npm run dev` → `vite`
-- `npx vite build` — verified working in Phase 0A
-- `npm run build` — **broken** (repeated `vite build` / `--ssr` flags)
+- `npx vite build` / **`npm run build`** — client production Vite build (`vite build`)
 
 ---
 
@@ -248,8 +252,8 @@ Quality commands that actually exist:
 |---|---|
 | `composer dev` | `artisan serve` + queue listen + pail + `npm run dev` |
 | `composer setup` | install, copy `.env`, `key:generate`, **`migrate --force`**, `npm install`, `npm run build` |
-| `npm run build` | Corrupted script; do not treat as the production build |
-| `npx vite build` | Client production build works |
+| `npm run build` | Client production Vite build (`vite build`); SSR not wired |
+| `npx vite build` | Same client production build |
 | CI/CD | None (no `.github/workflows`, no GitLab CI) |
 | Docker | Sail package only; no compose file |
 
@@ -259,18 +263,18 @@ README is still the default Laravel skeleton README.
 
 ## Known Technical Debt
 
-Verified from source and Phase 0A validation. Not a wish list.
+Verified from source and Phase 0A/0C-A validation. Not a wish list.
 
-1. Admin authorization is UI-only.
-2. Public registration is enabled.
-3. `MustVerifyEmail` is not implemented; `verified` middleware is ineffective.
+1. ~~Admin authorization is UI-only.~~ **Resolved in 0C-A** (route `permission:` middleware). Dashboard remains auth-only.
+2. ~~Public registration is enabled.~~ **Resolved in 0C-A** (Fortify registration disabled; ADR 0002).
+3. `MustVerifyEmail` is not implemented; email verification remains deferred (Fortify flag still present).
 4. CMS catch-all `/{slug}` uses `.*`.
 5. `/sermons` and `/events` are leftover CMS aliases.
-6. ACL vs navigation permission name mismatch (`files.view` / `settings.view`).
+6. `access settings` remains unused; Jetstream profile is self-service.
 7. `culture.*` and `artikel.*` permissions have no modules.
-8. FileManager restore/forceDelete routes without methods; tests fail.
+8. ~~FileManager restore/forceDelete routes without methods.~~ **Resolved in 0C-A**.
 9. Hero media collection registration is incorrect (`registerMediaCollections` calls conversions).
-10. `npm run build` is unusable; `composer setup` depends on it and on `migrate --force`.
+10. ~~`npm run build` is unusable.~~ **Resolved in 0C-A** (`vite build`). `composer setup` still runs `migrate --force` (operational hazard; do not run unasked).
 11. `HandleInertiaRequests` shares dotted `auth.user.*` keys.
 12. Dual button/modal component families (Jetstream vs Base).
 13. Tailwind v3 runtime vs unused `@tailwindcss/vite` v4 dependency.
