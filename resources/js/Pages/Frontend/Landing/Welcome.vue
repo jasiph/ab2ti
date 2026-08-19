@@ -11,6 +11,10 @@ defineProps({
     laravelVersion: String,
     phpVersion: String,
     hero: Object,
+    welcomeSection: {
+        type: Object,
+        default: null,
+    },
 });
 </script>
 
@@ -18,7 +22,7 @@ defineProps({
     <FrontendLayout title="Selamat Datang">
         <HeroSection :hero="hero" />
         
-        <WelcomeSection />
+        <WelcomeSection :section="welcomeSection" />
         
         <ServiceEvents />
     </FrontendLayout>

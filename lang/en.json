@@ -252,6 +252,14 @@
     "Retry With": "Retry With",
     "Role": "Role",
     "Save": "Save",
+    "Welcome Section": "Welcome Section",
+    "Content": "Content",
+    "Secondary Content": "Secondary Content",
+    "Image URL": "Image URL",
+    "CTA Label": "CTA label",
+    "CTA URL": "CTA URL",
+    "Select from Library": "Select from library",
+    "Saving...": "Saving...",
     "Save & Close": "Save & Close",
     "Save & Return": "Save & Return",
     "Save :name": "Save :name",
@@ -369,5 +377,11 @@
     "You may delete any of your existing tokens if they are no longer needed.": "You may delete any of your existing tokens if they are no longer needed.",
     "You may not delete your personal team.": "You may not delete your personal team.",
     "You may not leave a team that you created.": "You may not leave a team that you created.",
-    "Your email address is unverified.": "Your email address is unverified."
+    "Your email address is unverified.": "Your email address is unverified.",
+    "Block Templates": "Block Templates",
+    "Dynamic Block Templates": "Dynamic Block Templates",
+    "Create New Block": "Create New Block",
+    "No block templates found": "No block templates found",
+    "Get started by creating a new block template.": "Get started by creating a new block template.",
+    "block_templates_info": "Block templates can be inserted directly in the RichEditor to build reusable content sections quickly."
 }

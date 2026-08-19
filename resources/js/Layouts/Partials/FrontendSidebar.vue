@@ -59,7 +59,7 @@ const { frontendMenus } = useNavigation();
                                 <ul role="list" class="-mx-2 space-y-1">
                                     <li v-for="item in frontendMenus" :key="item.label">
                                         <ResponsiveNavLink
-                                            :href="route(item.route)"
+                                            :href="route(item.route, item.params || {})"
                                             :active="item.active"
                                             @click="$emit('close')"
                                         >

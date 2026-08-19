@@ -55,7 +55,7 @@ const page = usePage();
                         :key="index"
                     >
                         <NavLink
-                            :href="route(item.route)"
+                            :href="route(item.route, item.params || {})"
                             :active="item.active"
                         >
                             {{ $t(item.label) }}

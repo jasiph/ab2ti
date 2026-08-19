@@ -38,27 +38,45 @@ Route::get('/', function () {
             ];
         }
 
-        return Inertia::render('Frontend/Landing/Welcome', [ // Updated path
+    $welcome = \App\Models\WelcomeSection::query()
+        ->active()
+        ->latest()
+        ->first();
+
+    $welcomeSection = null;
+    if ($welcome) {
+        $welcomeSection = [
+            'title' => $welcome->title,
+            'content' => $welcome->content,
+            'secondary_content' => $welcome->secondary_content,
+            'image_url' => $welcome->image_url,
+            'cta_label' => $welcome->cta_label,
+            'cta_url' => $welcome->cta_url,
+        ];
+    }
+
+    return Inertia::render('Frontend/Landing/Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
         'hero' => $heroData,
-        ]);
-    })->name('welcome');
+        'welcomeSection' => $welcomeSection,
+    ]);
+})->name('welcome');
 
-// Placeholder Routes for Frontend Navigation
+// Frontend CMS shortcuts (mapped to dynamic pages)
 Route::get('/about', function () {
-    return Inertia::render('Frontend/Landing/Welcome');
+    return app(\App\Http\Controllers\PageController::class)->show('about');
 })->name('about');
 Route::get('/sermons', function () {
-    return Inertia::render('Frontend/Landing/Welcome');
+    return app(\App\Http\Controllers\PageController::class)->show('sermons');
 })->name('sermons');
 Route::get('/events', function () {
-    return Inertia::render('Frontend/Landing/Welcome');
+    return app(\App\Http\Controllers\PageController::class)->show('events');
 })->name('events');
 Route::get('/contact', function () {
-    return Inertia::render('Frontend/Landing/Welcome');
+    return app(\App\Http\Controllers\PageController::class)->show('contact');
 })->name('contact');
 
 Route::middleware([
@@ -93,6 +111,14 @@ Route::middleware([
         // Hero Management
         Route::resource('heroes', \App\Http\Controllers\Admin\HeroController::class);
 
+        Route::get('welcome-section', [\App\Http\Controllers\Admin\WelcomeSectionController::class, 'edit'])->name('welcome-section.edit');
+        Route::put('welcome-section', [\App\Http\Controllers\Admin\WelcomeSectionController::class, 'update'])->name('welcome-section.update');
+        Route::resource('pages', \App\Http\Controllers\Admin\PageController::class);
+        Route::patch('/pages/{page}/toggle', [\App\Http\Controllers\Admin\PageController::class, 'toggle'])->name('pages.toggle');
+        Route::get('/block-templates/active', [\App\Http\Controllers\Admin\BlockTemplateController::class, 'getActiveBlocks'])->name('block-templates.active');
+        Route::resource('block-templates', \App\Http\Controllers\Admin\BlockTemplateController::class);
+        Route::patch('/block-templates/{block_template}/toggle', [\App\Http\Controllers\Admin\BlockTemplateController::class, 'toggle'])->name('block-templates.toggle');
+
         // Song Management
         Route::resource('songs', \App\Http\Controllers\Admin\SongController::class);
         Route::resource('song-categories', \App\Http\Controllers\Admin\SongCategoryController::class)->except(['create', 'edit', 'show']);
@@ -110,3 +136,8 @@ Route::middleware([
 
 // Public Verification
 Route::get('/verify/doc/{letter}', [\App\Http\Controllers\Admin\LetterController::class , 'verify'])->name('letter.verify');
+
+// Frontend CMS catch-all route (keep at bottom to avoid conflicts)
+Route::get('/{slug}', [\App\Http\Controllers\PageController::class, 'show'])
+    ->where('slug', '.*')
+    ->name('pages.show');

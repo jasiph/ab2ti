@@ -63,7 +63,11 @@ export function useNavigation() {
             {
                 label: trans("CMS"),
                 permission: "files.view", // Adjust permission as needed
-                active: route().current("admin.files.*") || route().current("admin.heroes.*"),
+                active:
+                    route().current("admin.files.*") ||
+                    route().current("admin.heroes.*") ||
+                    route().current("admin.pages.*") ||
+                    route().current("admin.block-templates.*"),
                 icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z",
                 children: [
                     {
@@ -77,6 +81,18 @@ export function useNavigation() {
                         route: "admin.heroes.index",
                         permission: "heroes.view",
                         active: route().current("admin.heroes.*"),
+                    },
+                    {
+                        label: trans("Pages"),
+                        route: "admin.pages.index",
+                        permission: "files.view",
+                        active: route().current("admin.pages.*"),
+                    },
+                    {
+                        label: trans("Block Templates"),
+                        route: "admin.block-templates.index",
+                        permission: "files.view",
+                        active: route().current("admin.block-templates.*"),
                     },
                 ],
             },
@@ -161,10 +177,24 @@ export function useNavigation() {
      */
     const frontendMenus = computed(() => [
         { label: trans("Home"), route: "welcome", active: route().current("welcome") },
-        { label: trans("About AB2TI"), route: "about", active: route().current("about") },
+        {
+            label: trans("About AB2TI"),
+            route: "pages.show",
+            params: { slug: "about" },
+            active:
+                route().current("about") ||
+                (route().current("pages.show") && route().params.slug === "about"),
+        },
         { label: trans("Farming Tech"), route: "sermons", active: route().current("sermons") },
         { label: trans("News"), route: "events", active: route().current("events") },
-        { label: trans("Contact"), route: "contact", active: route().current("contact") },
+        {
+            label: trans("Contact"),
+            route: "pages.show",
+            params: { slug: "contact" },
+            active:
+                route().current("contact") ||
+                (route().current("pages.show") && route().params.slug === "contact"),
+        },
     ]);
 
     return { menus, frontendMenus };
