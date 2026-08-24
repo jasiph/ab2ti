@@ -41,7 +41,7 @@ const submit = () => {
     <AppLayout :title="$t('Welcome Section')">
         <template #header>
             <div class="flex items-center gap-3">
-                <Link :href="route('admin.heroes.index')" class="text-text-muted hover:text-text-main transition">
+                <Link :href="route('admin.pages.index')" class="text-text-muted hover:text-text-main transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>

@@ -1,0 +1,18 @@
+{
+    "Dynamic Block Templates": "Dynamic Block Templates",
+    "Create New Block": "Create New Block",
+    "No block templates found": "No block templates found",
+    "Get started by creating a new block template.": "Get started by creating a new block template.",
+    "Delete this block template?": "Delete this block template?",
+    "block_templates_info": "Block templates are HTML snippets that can be inserted into the page editor. The block identity (name) is preserved when inserted.",
+    "Currently Active": "Currently Active",
+    "Set as Active": "Set as Active",
+    "Select from Library": "Select from Library",
+    "Saving...": "Saving...",
+    "Save": "Save",
+    "Content": "Content",
+    "Secondary Content": "Secondary Content",
+    "Image URL": "Image URL",
+    "CTA Label": "CTA Label",
+    "CTA URL": "CTA URL"
+}

@@ -37,10 +37,18 @@ return [
             'report' => false,
         ],
 
+        'membership_documents' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/membership-documents'),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/') . '/storage',
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

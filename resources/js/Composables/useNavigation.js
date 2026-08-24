@@ -87,6 +87,12 @@ export function useNavigation() {
                         active: route().current("admin.heroes.*"),
                     },
                     {
+                        label: trans("Welcome Section"),
+                        route: "admin.welcome-section.edit",
+                        permission: "cms.view",
+                        active: route().current("admin.welcome-section.*"),
+                    },
+                    {
                         label: trans("Pages"),
                         route: "admin.pages.index",
                         permission: "cms.view",
@@ -97,6 +103,87 @@ export function useNavigation() {
                         route: "admin.block-templates.index",
                         permission: "cms.view",
                         active: route().current("admin.block-templates.*"),
+                    },
+                ],
+            },
+
+            {
+                label: trans("Publishing"),
+                permission: ["publishing-publications.view"],
+                active: route().current("admin.publishing.*"),
+                icon: "M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z",
+                children: [
+                    {
+                        label: trans("Publications"),
+                        route: "admin.publishing.publications.index",
+                        permission: "publishing-publications.view",
+                        active: route().current("admin.publishing.publications.*"),
+                    },
+                ],
+            },
+
+            {
+                label: trans("Knowledge"),
+                permission: ["knowledge-articles.view"],
+                active: route().current("admin.knowledge.*"),
+                icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253",
+                children: [
+                    {
+                        label: trans("Knowledge articles"),
+                        route: "admin.knowledge.articles.index",
+                        permission: "knowledge-articles.view",
+                        active: route().current("admin.knowledge.articles.*"),
+                    },
+                ],
+            },
+
+            {
+                label: trans("Membership"),
+                permission: [
+                    "membership-applications.view",
+                    "membership-members.view",
+                ],
+                active: route().current("admin.membership.*"),
+                icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z",
+                children: [
+                    {
+                        label: trans("Membership applications"),
+                        route: "admin.membership.applications.index",
+                        permission: "membership-applications.view",
+                        active: route().current("admin.membership.applications.*"),
+                    },
+                    {
+                        label: trans("AB2TI members"),
+                        route: "admin.membership.members.index",
+                        permission: "membership-members.view",
+                        active: route().current("admin.membership.members.*"),
+                    },
+                ],
+            },
+
+            {
+                label: trans("Lapak Anggota"),
+                permission: ["lapak.view"],
+                active: route().current("admin.lapak.*"),
+                icon: "M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z",
+                children: [
+                    {
+                        label: trans("Lapak storefronts"),
+                        route: "admin.lapak.storefronts.index",
+                        permission: "lapak.view",
+                        active: route().current("admin.lapak.storefronts.*"),
+                    },
+                    {
+                        label: trans("Lapak listings"),
+                        route: "admin.lapak.listings.index",
+                        permission: "lapak.view",
+                        active: route().current("admin.lapak.listings.*"),
+                    },
+                    {
+                        label: trans("Lapak categories"),
+                        route: "admin.lapak.categories.index",
+                        permission: "lapak.view",
+                        active: route().current("admin.lapak.categories.*"),
                     },
                 ],
             },
@@ -133,29 +220,41 @@ export function useNavigation() {
     });
 
     /**
-     * Definisi Menu Frontend (Public)
-     * Tidak butuh permission check karena public
-     */
-    /**
-     * Definisi Menu Frontend (Public)
-     * Tidak butuh permission check karena public
+     * Public destinations currently in RC. Do not add placeholder or
+     * coming-soon items.
      */
     const frontendMenus = computed(() => [
-        { label: trans("Home"), route: "welcome", active: route().current("welcome") },
+        { label: "Home", route: "welcome", active: route().current("welcome") },
         {
-            label: trans("About AB2TI"),
-            route: "pages.show",
-            params: { slug: "about" },
+            label: "About AB2TI",
+            route: "about",
             active:
                 route().current("about") ||
                 (route().current("pages.show") && route().params.slug === "about"),
         },
-        { label: trans("Farming Tech"), route: "sermons", active: route().current("sermons") },
-        { label: trans("News"), route: "events", active: route().current("events") },
         {
-            label: trans("Contact"),
-            route: "pages.show",
-            params: { slug: "contact" },
+            label: "Publications",
+            route: "publications.index",
+            active: route().current("publications.*"),
+        },
+        {
+            label: "Teknologi Tani",
+            route: "knowledge.index",
+            active: route().current("knowledge.*"),
+        },
+        {
+            label: "Lapak Anggota",
+            route: "lapak.index",
+            active: route().current("lapak.*"),
+        },
+        {
+            label: "Membership",
+            route: "membership.index",
+            active: route().current("membership.*"),
+        },
+        {
+            label: "Contact",
+            route: "contact",
             active:
                 route().current("contact") ||
                 (route().current("pages.show") && route().params.slug === "contact"),

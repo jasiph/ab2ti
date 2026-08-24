@@ -1,43 +1,135 @@
 <script setup>
-import { computed, onMounted, onUnmounted, watch } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 
 const props = defineProps({
     show: { type: Boolean, default: false },
     maxWidth: { type: String, default: "2xl" },
     closeable: { type: Boolean, default: true },
     fullscreen: { type: Boolean, default: false },
+    labelledBy: { type: String, default: "" },
+    ariaLabel: { type: String, default: "Dialog" },
 });
 
 const emit = defineEmits(["close"]);
 
-// Scroll Lock Body
+const panel = ref(null);
+const previouslyFocused = ref(null);
+
+const FOCUSABLE =
+    'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+const visibleFocusable = () => {
+    if (!panel.value) {
+        return [];
+    }
+
+    return [...panel.value.querySelectorAll(FOCUSABLE)].filter((element) => {
+        const style = window.getComputedStyle(element);
+
+        return (
+            style.display !== "none" &&
+            style.visibility !== "hidden" &&
+            element.getClientRects().length > 0
+        );
+    });
+};
+
+const focusInitial = async () => {
+    await nextTick();
+
+    const preferred = panel.value?.querySelector("[data-modal-initial-focus]");
+    if (preferred instanceof HTMLElement) {
+        preferred.focus();
+        return;
+    }
+
+    const focusable = visibleFocusable();
+    if (focusable[0] instanceof HTMLElement) {
+        focusable[0].focus();
+        return;
+    }
+
+    panel.value?.focus();
+};
+
 watch(
     () => props.show,
-    (show) => {
+    async (show) => {
         document.body.style.overflow = show ? "hidden" : null;
+
+        if (show) {
+            previouslyFocused.value =
+                document.activeElement instanceof HTMLElement
+                    ? document.activeElement
+                    : null;
+            await focusInitial();
+            return;
+        }
+
+        const opener = previouslyFocused.value;
+        previouslyFocused.value = null;
+        await nextTick();
+        opener?.focus?.();
     },
 );
 
 const close = () => {
-    if (props.closeable) emit("close");
-};
-const closeOnEscape = (e) => {
-    if (e.key === "Escape" && props.show) close();
+    if (props.closeable) {
+        emit("close");
+    }
 };
 
-onMounted(() => document.addEventListener("keydown", closeOnEscape));
+const onKeydown = (event) => {
+    if (!props.show) {
+        return;
+    }
+
+    if (event.key === "Escape") {
+        if (props.closeable) {
+            event.preventDefault();
+            close();
+        }
+        return;
+    }
+
+    if (event.key !== "Tab") {
+        return;
+    }
+
+    const focusable = visibleFocusable();
+    if (focusable.length === 0) {
+        event.preventDefault();
+        panel.value?.focus();
+        return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement;
+
+    if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+        return;
+    }
+
+    if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+    }
+};
+
+onMounted(() => document.addEventListener("keydown", onKeydown));
 onUnmounted(() => {
-    document.removeEventListener("keydown", closeOnEscape);
+    document.removeEventListener("keydown", onKeydown);
     document.body.style.overflow = null;
 });
 
-// Logic Lebar
 const maxWidthClass = computed(() => {
-    // Jika Fullscreen: Paksa lebar penuh
-    if (props.fullscreen)
+    if (props.fullscreen) {
         return "sm:w-full sm:max-w-none sm:h-full sm:rounded-none sm:m-0";
+    }
 
-    // Jika Normal: Ikuti maxWidth
     return {
         sm: "sm:max-w-sm",
         md: "sm:max-w-md",
@@ -60,6 +152,10 @@ const maxWidthClass = computed(() => {
                 v-show="show"
                 class="fixed inset-0 z-50 flex items-center justify-center"
                 :class="fullscreen ? 'p-0' : 'px-0 py-0 sm:px-4 sm:py-6'"
+                role="dialog"
+                aria-modal="true"
+                :aria-labelledby="labelledBy || undefined"
+                :aria-label="labelledBy ? undefined : ariaLabel"
             >
                 <transition
                     enter-active-class="ease-out duration-300"
@@ -90,25 +186,29 @@ const maxWidthClass = computed(() => {
                 >
                     <div
                         v-show="show"
-                        class="bg-surface text-text-main shadow-xl transform transition-all w-full flex flex-col overflow-hidden"
+                        ref="panel"
+                        tabindex="-1"
+                        class="bg-surface text-text-main shadow-xl transform transition-all w-full flex flex-col overflow-hidden outline-none"
                         :class="[
                             maxWidthClass,
-                            // MOBILE & FULLSCREEN DESKTOP: Tinggi penuh, sudut kotak
                             fullscreen
                                 ? 'h-full rounded-none'
                                 : 'h-full rounded-none sm:h-auto sm:max-h-[90vh] sm:rounded-xl',
                         ]"
                     >
-                        <div class="absolute top-4 right-4 z-10">
+                        <div v-if="closeable" class="absolute top-4 right-4 z-10">
                             <button
+                                type="button"
                                 @click="close"
-                                class="p-2 rounded-full bg-surface/80 hover:bg-surface-variant text-text-muted hover:text-text-main transition backdrop-blur-md border border-border/50 shadow-sm"
+                                class="p-2 rounded-full bg-surface/80 hover:bg-surface-variant text-text-muted hover:text-text-main transition backdrop-blur-md border border-border/50 shadow-sm min-h-10 min-w-10 inline-flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+                                aria-label="Tutup"
                             >
                                 <svg
                                     class="w-6 h-6"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
+                                    aria-hidden="true"
                                 >
                                     <path
                                         stroke-linecap="round"

@@ -43,5 +43,51 @@ return [
             'heroes.update',
             'heroes.delete',
         ],
+
+        // Group: Membership applications (staff queue)
+        'membership-applications' => [
+            'membership-applications.view',
+            'membership-applications.review',
+            'membership-applications.approve',
+            'membership-applications.reject',
+            'membership-applications.request-revision',
+        ],
+
+        // Group: AB2TI members (domain identity, not a Spatie role)
+        'membership-members' => [
+            'membership-members.view',
+            'membership-members.update',
+        ],
+
+        // Group: Private membership documents (not media.*)
+        'membership-documents' => [
+            'membership-documents.view',
+            'membership-documents.manage',
+        ],
+
+        // Group: Publishing
+        'publishing-publications' => [
+            'publishing-publications.view',
+            'publishing-publications.create',
+            'publishing-publications.update',
+            'publishing-publications.publish',
+            'publishing-publications.delete',
+        ],
+
+        // Group: Agricultural Knowledge
+        'knowledge-articles' => [
+            'knowledge-articles.view',
+            'knowledge-articles.create',
+            'knowledge-articles.update',
+            'knowledge-articles.publish',
+            'knowledge-articles.delete',
+        ],
+
+        // Group: Lapak Anggota (classified marketplace; not e-commerce)
+        'lapak' => [
+            'lapak.view',
+            'lapak.manage',
+            'lapak.moderate',
+        ],
     ],
 ];

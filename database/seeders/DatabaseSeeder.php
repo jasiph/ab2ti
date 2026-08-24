@@ -15,7 +15,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        if (app()->environment('production')) {
+            $this->command?->warn('DatabaseSeeder is development-only. Production bootstrap is: migrate, acl:sync, ab2ti:provision-operator.');
+
+            return;
+        }
 
         User::factory()->create([
             'name' => 'Test User',

@@ -85,6 +85,9 @@ class FileManagerTest extends TestCase
         $this->assertDatabaseHas('files', ['id' => $fileModel->id, 'deleted_at' => null]);
         $this->assertTrue($fileModel->fresh()->hasMedia('default'));
         $this->assertSame(1, $fileModel->fresh()->getMedia('default')->count());
+        $response->assertJsonPath('file.id', $fileModel->id);
+        $response->assertJsonPath('file.name', 'restore_me.jpg');
+        $this->assertNotEmpty($response->json('file.url'));
     }
 
     public function test_restore_returns_not_found_for_missing_or_live_files()
@@ -140,5 +143,33 @@ class FileManagerTest extends TestCase
         $this->actingAs($this->user)
             ->delete(route('admin.files.force-delete', $live->id))
             ->assertNotFound();
+    }
+
+    public function test_upload_form_loads_for_authorized_staff(): void
+    {
+        $this->actingAs($this->user)
+            ->get(route('admin.files.create'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('Admin/FileManager/Form'));
+    }
+
+    public function test_upload_validates_files(): void
+    {
+        $this->actingAs($this->user)
+            ->from(route('admin.files.create'))
+            ->post(route('admin.files.store'), [])
+            ->assertRedirect(route('admin.files.create'))
+            ->assertSessionHasErrors(['files']);
+    }
+
+    public function test_unauthorized_user_cannot_access_file_manager(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->get(route('admin.files.index'))->assertForbidden();
+        $this->actingAs($user)->get(route('admin.files.create'))->assertForbidden();
+        $this->actingAs($user)->post(route('admin.files.store'), [
+            'files' => [UploadedFile::fake()->image('blocked.jpg')],
+        ])->assertForbidden();
     }
 }

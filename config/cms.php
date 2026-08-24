@@ -33,6 +33,32 @@ return [
 
         'hot' => 'Vite HMR lockfile/path under public/hot.',
 
+        'keanggotaan' => 'Association membership public family (informational landing + intake).',
+
+        'akses' => 'Secure Capability Access redeem and loginless purpose workspace (/akses/*).',
+
+        'anggota' => 'Reserved so CMS cannot occupy the legacy membership URL family.',
+
+        'publikasi' => 'Publishing hub (/publikasi).',
+
+        'berita' => 'Publishing type family (/berita/{slug}).',
+
+        'kegiatan' => 'Publishing type family (/kegiatan/{slug}).',
+
+        'siaran-pers' => 'Publishing type family (/siaran-pers/{slug}).',
+
+        'liputan-media' => 'Publishing type family (/liputan-media/{slug}).',
+
+        'teknologi-tani' => 'Agricultural Knowledge public family (/teknologi-tani).',
+
+        'lapak' => 'Lapak Anggota public family (/lapak). Admin lives under /admin/lapak; owner workspace under /akun/lapak.',
+
+        'sermons' => 'Retired Presbi alias. Not an AB2TI URL. Must not become a CMS page.',
+
+        'events' => 'Retired Presbi alias. Not an AB2TI URL. Must not become a CMS page.',
+
+        'kontak' => 'Reserved so CMS cannot occupy the Indonesian contact URL family. Public contact remains /contact until an IA change.',
+
         'language' => 'Locale switcher (/language/{locale}).',
 
         'login' => 'Fortify login.',
@@ -52,6 +78,8 @@ return [
         'up' => 'Laravel health endpoint (/up).',
 
         'user' => 'Jetstream profile, password, 2FA, and API-token routes (/user/*).',
+
+        'akun' => 'Authenticated account workspace (Member account-link + Lapak Saya). Not the public /lapak family.',
 
     ],
 

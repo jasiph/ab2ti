@@ -4,7 +4,7 @@ import AuthenticationCard from '@/Components/AuthenticationCard.vue';
 import AuthenticationCardLogo from '@/Components/AuthenticationCardLogo.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
+import BaseButton from '@/Components/Base/BaseButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 
 const props = defineProps({
@@ -76,9 +76,9 @@ const submit = () => {
             </div>
 
             <div class="flex items-center justify-end mt-4">
-                <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                <BaseButton type="submit" :disabled="form.processing" :loading="form.processing">
                     Reset Password
-                </PrimaryButton>
+                </BaseButton>
             </div>
         </form>
     </AuthenticationCard>

@@ -4,8 +4,8 @@ const state = reactive({
     show: false,
     title: '',
     message: '',
-    confirmText: 'Confirm',
-    cancelText: 'Cancel',
+    confirmText: 'Lanjutkan',
+    cancelText: 'Batal',
     variant: 'danger', // 'danger' | 'warning' | 'info'
     onConfirm: null,
     onCancel: null,
@@ -14,10 +14,10 @@ const state = reactive({
 
 export function useConfirm() {
     const confirm = ({
-        title = 'Are you sure?',
+        title = 'Konfirmasi',
         message = '',
-        confirmText = 'Confirm',
-        cancelText = 'Cancel',
+        confirmText = 'Lanjutkan',
+        cancelText = 'Batal',
         variant = 'danger',
     } = {}) => {
         return new Promise((resolve) => {
@@ -41,9 +41,9 @@ export function useConfirm() {
 
     // Shorthand for alert-style (info, no cancel)
     const alertDialog = ({
-        title = 'Notice',
+        title = 'Pemberitahuan',
         message = '',
-        confirmText = 'OK',
+        confirmText = 'Mengerti',
         variant = 'info',
     } = {}) => {
         return new Promise((resolve) => {

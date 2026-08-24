@@ -2,6 +2,7 @@
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link, router } from "@inertiajs/vue3";
 import BaseButton from "@/Components/Base/BaseButton.vue";
+import BasePagination from "@/Components/Base/BasePagination.vue";
 
 defineProps({ blockTemplates: Object, filters: Object });
 
@@ -141,11 +142,7 @@ const toggleStatus = (id) => {
                     </div>
 
                     <div v-if="blockTemplates.links && blockTemplates.data.length > 0" class="mt-6">
-                        <component
-                            :is="'BasePagination'"
-                            v-if="$options.components?.BasePagination"
-                            :links="blockTemplates.links"
-                        />
+                        <BasePagination :links="blockTemplates.links" />
                     </div>
                 </div>
             </div>

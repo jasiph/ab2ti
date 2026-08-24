@@ -1,10 +1,10 @@
 # AB2TI 2.0 Project Constitution
 
-Constitution Version: 1.1
+Constitution Version: 1.2
 Project Stage: Foundation
 Status: Active
 Adopted: 2026-08-19
-Amended: 2026-08-19 (v1.1 — backend pattern clarification; admin authorization current state)
+Amended: 2026-08-19 (v1.1 — backend pattern clarification; admin authorization current state); 2026-08-21 (v1.2 — retire Presbi `/sermons` and `/events` aliases, ADR 0005)
 Source of architecture facts: `docs/project/ARCHITECTURE_BASELINE.md`
 
 This Constitution is the canonical engineering policy for this repository. Cursor Project Rules operationalize it. Rules MUST NOT silently override it.
@@ -179,7 +179,7 @@ Those items are in the Foundation Backlog until resolved.
 
 The catch-all excludes reserved first segments from `config/cms.php` (ADR 0003). Nested CMS slugs remain allowed. New explicit routes MUST still be declared above the catch-all.
 
-Legacy aliases `/sermons` and `/events` MUST NOT be renamed or removed without an information-architecture ADR. No public URL changes without an explicit routing/IA decision.
+Presbi aliases `/sermons` and `/events` are **retired** (ADR 0005). They MUST NOT be restored, redirected to AB2TI content, or occupied as CMS pages. Remaining public URL changes still require an explicit routing/IA decision.
 
 Admin URLs stay under `/admin` with names `admin.*`. Dashboard exists at both `/dashboard` and `/admin/dashboard`; do not invent a third dashboard URL without an ADR.
 

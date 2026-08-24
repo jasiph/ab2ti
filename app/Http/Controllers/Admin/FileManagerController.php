@@ -12,26 +12,8 @@ class FileManagerController extends Controller
 {
     public function index()
     {
-        $files = File::with('media')->latest()->paginate(24);
-
-        $files->getCollection()->transform(function ($file) {
-            $media = $file->getFirstMedia('default');
-
-            return [
-                'id' => $file->id,
-                'name' => $file->name ?? $media?->file_name,
-                'file_name' => $media?->file_name,
-                'url' => $media?->getUrl(),
-                'thumbnail_url' => $media?->getUrl('thumb'),
-                'mime_type' => $media?->mime_type,
-                'size' => $media?->size,
-                'created_at' => $file->created_at,
-                'extension' => $media?->extension,
-            ];
-        });
-
         return Inertia::render('Admin/FileManager/Index', [
-            'files' => $files,
+            'files' => $this->paginateFiles(),
         ]);
     }
 
@@ -59,10 +41,9 @@ class FileManagerController extends Controller
         return redirect()->route('admin.files.index')->with('success', 'Files uploaded successfully.');
     }
 
-    public function destroy(int $id)
+    public function destroy(File $file)
     {
-        $file = File::findOrFail($id);
-        $file->delete(); // soft-delete
+        $file->delete();
 
         return response()->json([
             'success' => true,
@@ -90,16 +71,7 @@ class FileManagerController extends Controller
 
             $file->addMedia($uploadedFile)->toMediaCollection('default');
 
-            $media = $file->getFirstMedia('default');
-            $uploaded[] = [
-                'id' => $file->id,
-                'name' => $file->name,
-                'file_name' => $media?->file_name,
-                'url' => $media?->getUrl(),
-                'thumbnail_url' => $media?->getUrl('thumb'),
-                'mime_type' => $media?->mime_type,
-                'size' => $media?->size,
-            ];
+            $uploaded[] = $this->presentFile($file);
         }
 
         return response()->json([
@@ -110,25 +82,7 @@ class FileManagerController extends Controller
 
     public function getJson()
     {
-        $files = File::with('media')->latest()->paginate(24);
-
-        $files->getCollection()->transform(function ($file) {
-            $media = $file->getFirstMedia('default');
-
-            return [
-                'id' => $file->id,
-                'name' => $file->name ?? $media?->file_name,
-                'file_name' => $media?->file_name,
-                'url' => $media?->getUrl(),
-                'thumbnail_url' => $media?->getUrl('thumb'),
-                'mime_type' => $media?->mime_type,
-                'size' => $media?->size,
-                'created_at' => $file->created_at,
-                'extension' => $media?->extension,
-            ];
-        });
-
-        return response()->json($files);
+        return response()->json($this->paginateFiles());
     }
 
     public function restore(int $file)
@@ -139,6 +93,7 @@ class FileManagerController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'File restored.',
+            'file' => $this->presentFile($record->fresh(['media'])),
         ]);
     }
 
@@ -154,5 +109,38 @@ class FileManagerController extends Controller
             'success' => true,
             'message' => 'File permanently deleted.',
         ]);
+    }
+
+    private function paginateFiles()
+    {
+        $files = File::with('media')->latest()->paginate(24);
+
+        $files->getCollection()->transform(fn (File $file) => $this->presentFile($file));
+
+        return $files;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function presentFile(?File $file): array
+    {
+        if ($file === null) {
+            return [];
+        }
+
+        $media = $file->getFirstMedia('default');
+
+        return [
+            'id' => $file->id,
+            'name' => $file->name ?? $media?->file_name,
+            'file_name' => $media?->file_name,
+            'url' => $media?->getUrl(),
+            'thumbnail_url' => $media?->getUrl('thumb'),
+            'mime_type' => $media?->mime_type,
+            'size' => $media?->size,
+            'created_at' => $file->created_at,
+            'extension' => $media?->extension,
+        ];
     }
 }

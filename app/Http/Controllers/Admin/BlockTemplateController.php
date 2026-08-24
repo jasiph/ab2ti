@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\BlockTemplate;
+use App\Support\Editorial\EditorialContent;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -13,9 +14,12 @@ class BlockTemplateController extends Controller
     {
         $query = BlockTemplate::query();
 
-        if ($request->search) {
-            $query->where('name', 'like', '%' . $request->search . '%')
-                ->orWhere('description', 'like', '%' . $request->search . '%');
+        if ($request->filled('search')) {
+            $search = $request->string('search')->toString();
+            $query->where(function ($blocks) use ($search) {
+                $blocks->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('description', 'like', '%'.$search.'%');
+            });
         }
 
         return Inertia::render('Admin/BlockTemplates/Index', [
@@ -41,7 +45,7 @@ class BlockTemplateController extends Controller
         BlockTemplate::create([
             'name' => $request->name,
             'description' => $request->description,
-            'html_content' => $request->html_content,
+            'html_content' => app(EditorialContent::class)->normalize($request->html_content),
             'is_active' => $request->is_active ?? true,
         ]);
 
@@ -67,7 +71,7 @@ class BlockTemplateController extends Controller
         $blockTemplate->update([
             'name' => $request->name,
             'description' => $request->description,
-            'html_content' => $request->html_content,
+            'html_content' => app(EditorialContent::class)->normalize($request->html_content),
             'is_active' => $request->is_active,
         ]);
 
@@ -77,13 +81,14 @@ class BlockTemplateController extends Controller
     public function destroy(BlockTemplate $blockTemplate)
     {
         $blockTemplate->delete();
+
         return redirect()->back()->with('success', 'Block Template deleted.');
     }
 
     public function toggle(BlockTemplate $blockTemplate)
     {
         $blockTemplate->update([
-            'is_active' => !$blockTemplate->is_active,
+            'is_active' => ! $blockTemplate->is_active,
         ]);
 
         return back()->with('success', 'Status Block Template updated.');
@@ -91,7 +96,19 @@ class BlockTemplateController extends Controller
 
     public function getActiveBlocks()
     {
-        $blocks = BlockTemplate::where('is_active', true)->latest()->get();
+        $pipeline = app(EditorialContent::class);
+
+        $blocks = BlockTemplate::query()
+            ->where('is_active', true)
+            ->latest()
+            ->get(['id', 'name', 'description', 'html_content'])
+            ->map(fn (BlockTemplate $block) => [
+                'id' => $block->id,
+                'name' => $block->name,
+                'description' => $block->description,
+                'html_content' => $pipeline->normalize($block->html_content),
+            ]);
+
         return response()->json($blocks);
     }
 }

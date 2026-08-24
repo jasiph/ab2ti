@@ -33,8 +33,9 @@ onMounted(() => {
 <template>
     <button
         @click="toggleTheme"
-        class="p-2 rounded-md text-text-muted hover:text-primary hover:bg-surface-variant transition duration-200 focus:outline-none"
-        :title="isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+        class="p-2 rounded-md min-h-control min-w-[2.75rem] inline-flex items-center justify-center text-text-muted hover:text-primary hover:bg-surface-variant transition duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+        :title="isDark ? $t('Switch to light mode') : $t('Switch to dark mode')"
+        :aria-label="isDark ? $t('Switch to light mode') : $t('Switch to dark mode')"
     >
         <svg
             v-if="isDark"

@@ -2,7 +2,10 @@
 import BaseCard from "@/Components/Base/BaseCard.vue";
 
 const props = defineProps({
-    files: Array,
+    files: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const emit = defineEmits(["file-click"]);

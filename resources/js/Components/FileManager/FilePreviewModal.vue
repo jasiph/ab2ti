@@ -21,22 +21,19 @@ const { showUndoToast } = useUndoToast();
 const deleteFile = async () => {
     const fileId = props.file.id;
     const fileName = props.file.name || props.file.file_name;
-console.log("===>" + fileId)
 
     try {
-        await axios.delete(`/admin/files/${fileId}`);
+        await axios.delete(route("admin.files.destroy", fileId));
         close();
-        console.log("===>" + fileId)
         emit("deleted", fileId);
 
-        // Wait for modal to start closing before showing toast
         await nextTick();
 
         showUndoToast({
             message: `"${fileName}" deleted`,
             onUndo: async () => {
                 try {
-                    const { data } = await axios.post(`/admin/files/${fileId}/restore`);
+                    const { data } = await axios.post(route("admin.files.restore", fileId));
                     emit("restored", data.file);
                 } catch (e) {
                     console.error("Failed to restore file:", e);
@@ -44,7 +41,7 @@ console.log("===>" + fileId)
             },
             onExpire: async () => {
                 try {
-                    await axios.delete(`/admin/files/${fileId}/force`);
+                    await axios.delete(route("admin.files.force-delete", fileId));
                 } catch (e) {
                     console.error("Failed to permanently delete file:", e);
                 }

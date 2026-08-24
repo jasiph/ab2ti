@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\File;
 use App\Models\Page;
 use App\Support\CmsPath;
+use App\Support\Editorial\EditorialContent;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -60,7 +61,7 @@ class PageController extends Controller
             $page = Page::create([
                 'title' => $validated['title'],
                 'slug' => $validated['slug'],
-                'content' => $validated['content'] ?? null,
+                'content' => app(EditorialContent::class)->normalize($validated['content'] ?? null),
                 'meta_title' => $validated['meta_title'] ?? $validated['title'],
                 'meta_description' => $validated['meta_description'] ?? null,
                 'settings' => $validated['settings'] ?? [],
@@ -91,6 +92,7 @@ class PageController extends Controller
     public function edit(Page $page)
     {
         $page->load('media');
+        $page->setAttribute('content', app(EditorialContent::class)->normalize($page->content));
 
         return Inertia::render('Admin/Pages/Form', [
             'page' => $page,
@@ -125,7 +127,7 @@ class PageController extends Controller
             $page->update([
                 'title' => $validated['title'],
                 'slug' => $validated['slug'],
-                'content' => $validated['content'] ?? null,
+                'content' => app(EditorialContent::class)->normalize($validated['content'] ?? null),
                 'meta_title' => $validated['meta_title'] ?? $validated['title'],
                 'meta_description' => $validated['meta_description'] ?? null,
                 'settings' => $validated['settings'] ?? [],

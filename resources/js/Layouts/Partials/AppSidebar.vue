@@ -57,9 +57,7 @@ const toggleMenu = (label) => {
             <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
                 <div class="flex-shrink-0 flex items-center px-4 mb-5">
                     <ApplicationMark class="block h-8 w-auto fill-primary" />
-                    <span class="ml-2 font-bold text-lg text-text-main"
-                        >AB2TI 2.0</span>
-                    >
+                    <span class="ml-2 font-bold text-lg text-text-main">AB2TI 2.0</span>
                 </div>
 
                 <nav class="mt-5 px-2 space-y-1">

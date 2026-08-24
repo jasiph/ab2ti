@@ -28,14 +28,58 @@ class RolesAndPermissionsSeeder extends Seeder
         // 4. Create Role & Assign Permission (Contoh)
         $userRole = Role::firstOrCreate(['name' => 'user']);
         $superAdminRole = Role::firstOrCreate(['name' => 'super-admin']);
+        $membershipAdminRole = Role::firstOrCreate(['name' => 'membership-admin']);
 
         // User biasa hanya boleh lihat
         $userRole->givePermissionTo([
             'media.view',
         ]);
 
-        // 5. Create Default Users
-        // Super Admin
+        $membershipAdminRole->syncPermissions([
+            'membership-applications.view',
+            'membership-applications.review',
+            'membership-applications.approve',
+            'membership-applications.reject',
+            'membership-applications.request-revision',
+            'membership-members.view',
+            'membership-members.update',
+            'membership-documents.view',
+            'membership-documents.manage',
+            'lapak.view',
+            'lapak.manage',
+            'lapak.moderate',
+        ]);
+
+        $editorRole = Role::firstOrCreate(['name' => 'editor']);
+        $editorRole->syncPermissions([
+            'cms.view',
+            'cms.create',
+            'cms.update',
+            'cms.delete',
+            'heroes.view',
+            'heroes.create',
+            'heroes.update',
+            'heroes.delete',
+            'media.view',
+            'media.create',
+            'media.update',
+            'media.delete',
+            'publishing-publications.view',
+            'publishing-publications.create',
+            'publishing-publications.update',
+            'publishing-publications.publish',
+            'publishing-publications.delete',
+            'knowledge-articles.view',
+            'knowledge-articles.create',
+            'knowledge-articles.update',
+            'knowledge-articles.publish',
+            'knowledge-articles.delete',
+        ]);
+
+        if (app()->environment('production')) {
+            return;
+        }
+
         $admin = User::firstOrCreate(
             ['email' => 'admin@admin.com'],
             [
@@ -46,7 +90,6 @@ class RolesAndPermissionsSeeder extends Seeder
         );
         $admin->assignRole($superAdminRole);
 
-        // Regular User
         $user = User::firstOrCreate(
             ['email' => 'user@user.com'],
             [

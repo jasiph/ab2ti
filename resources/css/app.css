@@ -31,6 +31,13 @@
 
         /* Border: Sage Border */
         --color-border: 220 225 215;
+
+        /* Semantic status (not brand accents) */
+        --color-success: 21 128 61;
+        --color-warning: 146 104 10;
+        --color-danger: 185 28 28;
+        --color-info: 37 99 135;
+        --color-focus: 22 101 52;
     }
 
     /* DARK MODE - Deep Forest */
@@ -60,6 +67,37 @@
 
         /* Border: Forest Border */
         --color-border: 40 55 45;
+
+        --color-success: 52 181 98;
+        --color-warning: 224 180 50;
+        --color-danger: 239 98 88;
+        --color-info: 96 165 194;
+        --color-focus: 34 160 80;
+    }
+
+    html {
+        font-size: 16px;
+        -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+        @apply bg-background text-text-main text-base leading-relaxed antialiased;
+    }
+
+    :focus-visible {
+        outline: 2px solid rgb(var(--color-focus));
+        outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
     }
 }
 @layer utilities {

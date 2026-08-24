@@ -16,8 +16,6 @@ const switchLanguage = (lang) => {
             preserveState: true, // Opsional: jaga state komponen lain
             preserveScroll: true,
             onSuccess: () => {
-                // 2. Setelah sukses (session tersimpan & page reload), load file bahasa
-                console.log(`[LanguageSwitcher] Switching to ${lang}...`);
                 loadLanguageAsync(lang);
             },
         },
@@ -31,12 +29,13 @@ const switchLanguage = (lang) => {
         <button
             v-if="currentLocale === 'id'"
             @click.prevent="switchLanguage('en')"
-            class="text-text-muted hover:text-primary transition flex items-center group"
-            title="Switch to English"
+            class="text-text-muted hover:text-primary transition flex items-center group min-h-control px-1 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+            :aria-label="$t('Switch to English')"
+            :title="$t('Switch to English')"
         >
             <span
                 class="mr-1 text-[10px] opacity-70 group-hover:opacity-100 transition"
-                >Change to:</span
+                >{{ $t("Change to") }}</span
             >
             <span
                 class="text-sm space-x-8 sm:-my-px font-bold border-b-2 border-transparent group-hover:border-primary transition"
@@ -48,12 +47,13 @@ const switchLanguage = (lang) => {
         <button
             v-else
             @click.prevent="switchLanguage('id')"
-            class="text-text-muted hover:text-primary transition flex items-center group"
-            title="Ubah ke Bahasa Indonesia"
+            class="text-text-muted hover:text-primary transition flex items-center group min-h-control px-1 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+            :aria-label="$t('Switch to Indonesian')"
+            :title="$t('Switch to Indonesian')"
         >
             <span
                 class="mr-1 text-[10px] opacity-70 group-hover:opacity-100 transition"
-                >Ganti ke:</span
+                >{{ $t("Change to") }}</span
             >
             <span
                 class="text-sm font-bold border-b-2 border-transparent group-hover:border-primary transition"

@@ -157,11 +157,12 @@ const onPageChange = (url) => {
 </script>
 
 <template>
-    <BaseModal :show="show" @close="close" maxWidth="4xl">
+    <BaseModal :show="show" labelled-by="file-picker-title" @close="close" maxWidth="4xl">
         <div class="flex flex-col h-[80vh]">
             <!-- Header with Tabs -->
             <div class="border-b border-gray-200 dark:border-gray-700">
                 <div class="px-4 sm:px-6 py-3 flex items-center justify-between">
+                    <h2 id="file-picker-title" class="sr-only">{{ $t('File Manager') }}</h2>
                     <div class="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
                         <!-- Browse Tab -->
                         <button

@@ -1,13 +1,10 @@
 <script setup>
 import { Head, Link, useForm } from "@inertiajs/vue3";
-import AuthenticationCard from "@/Components/AuthenticationCard.vue";
-import AuthenticationCardLogo from "@/Components/AuthenticationCardLogo.vue";
 import Checkbox from "@/Components/Checkbox.vue";
 import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
-import PrimaryButton from "@/Components/PrimaryButton.vue";
+import BaseButton from "@/Components/Base/BaseButton.vue";
 import TextInput from "@/Components/TextInput.vue";
-import BaseModal from "@/Components/Base/BaseModal.vue";
 import BaseCard from "@/Components/Base/BaseCard.vue";
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 
@@ -92,13 +89,14 @@ const submit = () => {
                     Forgot your password?
                 </Link>
 
-                <PrimaryButton
+                <BaseButton
+                    type="submit"
                     class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
                     :disabled="form.processing"
+                    :loading="form.processing"
                 >
                     Log in
-                </PrimaryButton>
+                </BaseButton>
             </div>
         </form>
     </BaseCard>

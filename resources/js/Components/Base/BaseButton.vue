@@ -18,7 +18,7 @@ const variantClasses = computed(() => {
             "bg-primary hover:bg-primary-dark text-white shadow-sm focus:ring-primary/50",
         secondary:
             "bg-surface border border-border text-text-main hover:bg-surface-variant focus:ring-gray-200 dark:focus:ring-gray-700",
-        danger: "bg-red-600 hover:bg-red-700 text-white focus:ring-red-500",
+        danger: "bg-danger hover:brightness-90 text-white focus:ring-danger/50",
         outline:
             "bg-transparent border border-primary text-primary hover:bg-primary/10",
         ghost: "bg-transparent text-text-muted hover:text-primary hover:bg-surface-variant shadow-none",
@@ -29,9 +29,9 @@ const variantClasses = computed(() => {
 // Mapping Size
 const sizeClasses = computed(() => {
     const sizes = {
-        sm: "px-3 py-1.5 text-xs",
-        md: "px-4 py-2 text-sm",
-        lg: "px-6 py-3 text-base",
+        sm: "px-3 py-2 text-sm",
+        md: "px-4 py-2.5 text-sm",
+        lg: "px-6 py-3 text-base min-h-12",
     };
     return sizes[props.size] || sizes.md;
 });
@@ -42,7 +42,7 @@ const sizeClasses = computed(() => {
         v-if="href"
         :href="href"
         :class="[
-            'inline-flex items-center justify-center font-medium rounded-md transition focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed',
+            'inline-flex items-center justify-center font-medium rounded-md transition focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed min-h-control',
             variantClasses,
             sizeClasses,
         ]"
@@ -54,8 +54,9 @@ const sizeClasses = computed(() => {
         v-else
         :type="type"
         :disabled="disabled || loading"
+        :aria-busy="loading ? 'true' : undefined"
         :class="[
-            'inline-flex items-center justify-center font-medium rounded-md transition focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed',
+            'inline-flex items-center justify-center font-medium rounded-md transition focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed min-h-control',
             variantClasses,
             sizeClasses,
         ]"

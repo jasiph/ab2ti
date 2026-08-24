@@ -5,7 +5,7 @@ import AuthenticationCard from '@/Components/AuthenticationCard.vue';
 import AuthenticationCardLogo from '@/Components/AuthenticationCardLogo.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
+import BaseButton from '@/Components/Base/BaseButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 
 const recovery = ref(false);
@@ -95,9 +95,9 @@ const submit = () => {
                     </template>
                 </button>
 
-                <PrimaryButton class="ms-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                <BaseButton type="submit" class="ms-4" :disabled="form.processing" :loading="form.processing">
                     Log in
-                </PrimaryButton>
+                </BaseButton>
             </div>
         </form>
     </AuthenticationCard>

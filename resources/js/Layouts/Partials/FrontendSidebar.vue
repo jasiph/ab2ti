@@ -1,86 +1,78 @@
 <script setup>
-import { Link } from "@inertiajs/vue3";
+import { onMounted, onUnmounted, watch } from "vue";
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
+import BaseModal from "@/Components/Base/BaseModal.vue";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
+import PublicTopbarUtilities from "@/Layouts/Partials/PublicTopbarUtilities.vue";
 import { useNavigation } from "@/Composables/useNavigation";
 
-defineProps({
+const props = defineProps({
     open: Boolean,
 });
 
-defineEmits(["close"]);
+const emit = defineEmits(["close"]);
 
 const { frontendMenus } = useNavigation();
+
+const closeIfDesktop = () => {
+    if (typeof window !== "undefined" && window.matchMedia("(min-width: 1280px)").matches) {
+        emit("close");
+    }
+};
+
+watch(
+    () => props.open,
+    (open) => {
+        if (open) {
+            closeIfDesktop();
+        }
+    },
+);
+
+onMounted(() => window.addEventListener("resize", closeIfDesktop));
+onUnmounted(() => window.removeEventListener("resize", closeIfDesktop));
 </script>
 
 <template>
-    <!-- Off-canvas Sidebar for Mobile -->
-    <div v-show="open" class="relative z-50 sm:hidden" role="dialog" aria-modal="true">
-        <!-- Backdrop -->
-        <div
-            v-show="open"
-            class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm transition-opacity ease-linear duration-300"
-            enter-active-class="opacity-0"
-            enter-to-class="opacity-100"
-            leave-active-class="opacity-100"
-            leave-to-class="opacity-0"
-            @click="$emit('close')"
-        ></div>
+    <BaseModal
+        :show="open"
+        closeable
+        labelled-by="public-mobile-nav-title"
+        :aria-label="$t('Navigasi')"
+        max-width="sm"
+        @close="emit('close')"
+    >
+        <div id="frontend-sidebar" class="flex h-full flex-col px-6 pb-8 pt-16">
+            <div class="flex items-center gap-2 mb-6">
+                <ApplicationLogo class="h-8 w-auto fill-current text-primary" />
+                <span class="font-bold text-lg text-primary">AB2TI</span>
+            </div>
 
-        <div class="fixed inset-0 flex">
-            <!-- Sidebar Panel -->
-            <div
-                v-show="open"
-                class="relative mr-16 flex w-full max-w-xs flex-1 transform transition ease-in-out duration-300"
-                enter-active-class="-translate-x-full"
-                enter-to-class="translate-x-0"
-                leave-active-class="translate-x-0"
-                leave-to-class="-translate-x-full"
-            >
-                <div class="absolute left-full top-0 flex w-16 justify-center pt-5">
-                    <button type="button" class="-m-2.5 p-2.5" @click="$emit('close')">
-                        <span class="sr-only">Close sidebar</span>
-                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
+            <h2 id="public-mobile-nav-title" class="sr-only">
+                {{ $t("Navigasi") }}
+            </h2>
 
-                <!-- Sidebar Content -->
-                <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-surface px-6 pb-4 ring-1 ring-white/10">
-                    <div class="flex h-16 shrink-0 items-center gap-2">
-                        <ApplicationLogo class="h-8 w-auto fill-current text-primary" />
-                        <span class="font-bold text-lg text-primary">AB2TI</span>
-                    </div>
-                    
-                    <nav class="flex flex-1 flex-col">
-                        <ul role="list" class="flex flex-1 flex-col gap-y-7">
-                            <li>
-                                <ul role="list" class="-mx-2 space-y-1">
-                                    <li v-for="item in frontendMenus" :key="item.label">
-                                        <ResponsiveNavLink
-                                            :href="route(item.route, item.params || {})"
-                                            :active="item.active"
-                                            @click="$emit('close')"
-                                        >
-                                            {{ item.label }}
-                                        </ResponsiveNavLink>
-                                    </li>
-                                </ul>
-                            </li>
-                            
-                            <li class="mt-auto">
-                                <Link
-                                    :href="route('login')"
-                                    class="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-text-muted hover:bg-surface-variant hover:text-text-main"
-                                >
-                                    Log in
-                                </Link>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
+            <nav class="flex flex-1 flex-col" :aria-label="$t('Navigasi')">
+                <ul role="list" class="space-y-1">
+                    <li v-for="item in frontendMenus" :key="item.label">
+                        <ResponsiveNavLink
+                            tone="public"
+                            :href="route(item.route, item.params || {})"
+                            :active="item.active"
+                            @click="emit('close')"
+                        >
+                            {{ $t(item.label) }}
+                        </ResponsiveNavLink>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="mt-8 pt-6 border-t border-border">
+                <p class="mb-4 text-xs font-medium uppercase tracking-wide text-text-muted">
+                    {{ $t("Site utilities") }}
+                </p>
+                <PublicTopbarUtilities variant="menu" @navigate="emit('close')" />
             </div>
         </div>
-    </div>
+    </BaseModal>
 </template>

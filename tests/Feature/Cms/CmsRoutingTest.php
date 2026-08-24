@@ -73,34 +73,23 @@ class CmsRoutingTest extends TestCase
         $this->assertFalse(\Illuminate\Support\Facades\Route::has('register'));
     }
 
-    public function test_sermons_alias_still_renders_the_sermons_cms_page(): void
+    public function test_retired_presbi_aliases_are_not_content_routes(): void
     {
         Page::query()->create([
-            'title' => 'Sermons',
+            'title' => 'Sermons leftover',
             'slug' => 'sermons',
             'is_active' => true,
         ]);
-
-        $this->get('/sermons')
-            ->assertOk()
-            ->assertInertia(fn ($page) => $page
-                ->component('Frontend/Page/Show')
-                ->where('page.slug', 'sermons'));
-    }
-
-    public function test_events_alias_still_renders_the_events_cms_page(): void
-    {
         Page::query()->create([
-            'title' => 'Events',
+            'title' => 'Events leftover',
             'slug' => 'events',
             'is_active' => true,
         ]);
 
-        $this->get('/events')
-            ->assertOk()
-            ->assertInertia(fn ($page) => $page
-                ->component('Frontend/Page/Show')
-                ->where('page.slug', 'events'));
+        $this->assertFalse(\Illuminate\Support\Facades\Route::has('sermons'));
+        $this->assertFalse(\Illuminate\Support\Facades\Route::has('events'));
+        $this->get('/sermons')->assertNotFound();
+        $this->get('/events')->assertNotFound();
     }
 
     public function test_inactive_cms_page_is_not_found(): void
@@ -155,6 +144,151 @@ class CmsRoutingTest extends TestCase
                 'is_active' => true,
             ])
             ->assertSessionHasErrors('slug');
+    }
+
+    public function test_keanggotaan_cannot_become_a_cms_page(): void
+    {
+        $user = $this->userWithPermissions(['cms.create']);
+
+        $this->actingAs($user)
+            ->post(route('admin.pages.store'), [
+                'title' => 'Keanggotaan CMS',
+                'slug' => 'keanggotaan',
+                'is_active' => true,
+            ])
+            ->assertSessionHasErrors('slug');
+
+        $this->actingAs($user)
+            ->post(route('admin.pages.store'), [
+                'title' => 'Nested',
+                'slug' => 'keanggotaan/info',
+                'is_active' => true,
+            ])
+            ->assertSessionHasErrors('slug');
+    }
+
+    public function test_akses_cannot_become_a_cms_page(): void
+    {
+        $user = $this->userWithPermissions(['cms.create']);
+
+        $this->actingAs($user)
+            ->post(route('admin.pages.store'), [
+                'title' => 'Akses CMS',
+                'slug' => 'akses',
+                'is_active' => true,
+            ])
+            ->assertSessionHasErrors('slug');
+    }
+
+    public function test_publishing_families_cannot_become_cms_pages(): void
+    {
+        $user = $this->userWithPermissions(['cms.create']);
+
+        foreach (['publikasi', 'berita', 'kegiatan', 'siaran-pers', 'liputan-media'] as $slug) {
+            $this->actingAs($user)
+                ->post(route('admin.pages.store'), [
+                    'title' => 'CMS '.$slug,
+                    'slug' => $slug,
+                    'is_active' => true,
+                ])
+                ->assertSessionHasErrors('slug');
+
+            $this->assertDatabaseMissing('pages', ['slug' => $slug]);
+        }
+
+        $this->actingAs($user)
+            ->post(route('admin.pages.store'), [
+                'title' => 'Nested berita',
+                'slug' => 'berita/lama',
+                'is_active' => true,
+            ])
+            ->assertSessionHasErrors('slug');
+    }
+
+    public function test_teknologi_tani_cannot_become_a_cms_page(): void
+    {
+        $user = $this->userWithPermissions(['cms.create']);
+
+        $this->actingAs($user)
+            ->post(route('admin.pages.store'), [
+                'title' => 'CMS teknologi tani',
+                'slug' => 'teknologi-tani',
+                'is_active' => true,
+            ])
+            ->assertSessionHasErrors('slug');
+
+        $this->actingAs($user)
+            ->post(route('admin.pages.store'), [
+                'title' => 'Nested',
+                'slug' => 'teknologi-tani/lama',
+                'is_active' => true,
+            ])
+            ->assertSessionHasErrors('slug');
+    }
+
+    public function test_retired_presbi_slugs_cannot_become_cms_pages(): void
+    {
+        $user = $this->userWithPermissions(['cms.create']);
+
+        foreach (['sermons', 'events', 'kontak'] as $slug) {
+            $this->actingAs($user)
+                ->post(route('admin.pages.store'), [
+                    'title' => 'CMS '.$slug,
+                    'slug' => $slug,
+                    'is_active' => true,
+                ])
+                ->assertSessionHasErrors('slug');
+        }
+    }
+
+    public function test_publishing_routes_are_not_captured_by_the_cms_catch_all(): void
+    {
+        Page::query()->create([
+            'title' => 'Fake publikasi',
+            'slug' => 'publikasi',
+            'is_active' => true,
+        ]);
+        Page::query()->create([
+            'title' => 'Fake berita',
+            'slug' => 'berita',
+            'is_active' => true,
+        ]);
+
+        $this->get('/publikasi')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('Frontend/Publishing/Index'));
+        $this->get('/berita')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('Frontend/Publishing/Index'));
+        $this->get('/kegiatan')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('Frontend/Publishing/Index'));
+    }
+
+    public function test_knowledge_routes_are_not_captured_by_the_cms_catch_all(): void
+    {
+        Page::query()->create([
+            'title' => 'Fake teknologi tani',
+            'slug' => 'teknologi-tani',
+            'is_active' => true,
+        ]);
+
+        $this->get('/teknologi-tani')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('Frontend/Knowledge/Index'));
+    }
+
+    public function test_membership_public_family_still_beats_cms(): void
+    {
+        Page::query()->create([
+            'title' => 'Fake keanggotaan',
+            'slug' => 'keanggotaan',
+            'is_active' => true,
+        ]);
+
+        $this->get('/keanggotaan')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('Frontend/Membership/Index'));
     }
 
     public function test_valid_nested_slug_can_be_created(): void

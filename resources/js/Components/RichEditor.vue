@@ -42,19 +42,7 @@ const editor = useEditor({
     },
     onUpdate: ({ editor }) => {
         if (!isCodeView.value) {
-            let html = editor.getHTML();
-            const tempDiv = document.createElement("div");
-            tempDiv.innerHTML = html;
-
-            const wrappers = tempDiv.querySelectorAll(".tiptap-block-wrapper");
-            wrappers.forEach((wrapper) => {
-                const content = wrapper.querySelector(".tiptap-block-content");
-                if (content) {
-                    wrapper.replaceWith(...content.childNodes);
-                }
-            });
-
-            emit("update:modelValue", tempDiv.innerHTML);
+            emit("update:modelValue", editor.getHTML());
         }
     },
 });
@@ -64,24 +52,13 @@ const toggleCodeView = () => {
     if (isCodeView.value) {
         codeViewContent.value = editor.value ? editor.value.getHTML() : props.modelValue;
     } else if (editor.value) {
-        editor.value.commands.setContent(codeViewContent.value, false);
+        editor.value.commands.setContent(codeViewContent.value, { emitUpdate: false });
     }
 };
 
 const handleHtmlInput = (e) => {
     codeViewContent.value = e.target.value;
-    const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = e.target.value;
-
-    const wrappers = tempDiv.querySelectorAll(".tiptap-block-wrapper");
-    wrappers.forEach((wrapper) => {
-        const content = wrapper.querySelector(".tiptap-block-content");
-        if (content) {
-            wrapper.replaceWith(...content.childNodes);
-        }
-    });
-
-    emit("update:modelValue", tempDiv.innerHTML);
+    emit("update:modelValue", e.target.value);
 };
 
 const insertImage = (media) => {
@@ -96,10 +73,11 @@ const insertImage = (media) => {
 
 const insertBlock = (block) => {
     if (editor.value) {
-        const minifiedHtml = block.html_content.replace(/>\s+</g, "><").trim();
+        const minifiedHtml = String(block.html_content || "").replace(/>\s+</g, "><").trim();
+        const type = String(block.name || "Block Content").replace(/["<>]/g, "");
 
         const wrappedContent = `
-            <div class="tiptap-block-wrapper" data-block-type="${block.name}">
+            <div class="tiptap-block-wrapper" data-block-type="${type}">
                 <div class="tiptap-block-content">${minifiedHtml}</div>
             </div>
             <p></p>
@@ -116,7 +94,7 @@ watch(
             !isCodeView.value &&
             editor.value.getHTML() !== newValue
         ) {
-            editor.value.commands.setContent(newValue, false);
+            editor.value.commands.setContent(newValue, { emitUpdate: false });
         }
     },
 );

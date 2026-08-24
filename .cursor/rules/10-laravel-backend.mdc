@@ -15,7 +15,7 @@ Current simple CRUD shape: **route → Admin/Page controller → `$request->vali
 That is the starting point, not a requirement to keep fat controllers forever. Do **not** introduce Form Requests, Actions, Services, repositories, or enums speculatively. Those MAY be added when actual complexity, reuse, transactions, or testability justify them. Business logic SHOULD NOT grow indefinitely inside controllers.
 
 - Admin HTTP: `App\Http\Controllers\Admin`, route names `admin.*`, URLs under `/admin`.
-- Public CMS: `PageController` + named aliases. Catch-all `GET /{slug}` (`pages.show`) MUST stay last. Register explicit routes **above** it. Reserved first segments live in `config/cms.php` (ADR 0003). Do not rename `/sermons` or `/events` without an IA ADR.
+- Public CMS: `PageController` + named aliases (`/about`, `/contact`). Catch-all `GET /{slug}` (`pages.show`) MUST stay last. Register explicit routes **above** it. Reserved first segments live in `config/cms.php` (ADR 0003). Retired Presbi aliases `/sermons` and `/events` MUST NOT be restored (ADR 0005).
 - Models: `User`, `Page`, `BlockTemplate`, `Hero`, `WelcomeSection`, `File`. Keep `$fillable`. Use transactions for multi-step writes (Page/Hero already do).
 - Permissions live in `config/acl.php` and `php artisan acl:sync`. Do not invent Vue-only permission strings. Do not silently change Fortify/Jetstream flags, registration, or `MustVerifyEmail`.
 - i18n: edit `lang/{locale}/sources/*.json`, then `php artisan lang:merge {locale}` (`id` and `en`). Do not add a second translation system.

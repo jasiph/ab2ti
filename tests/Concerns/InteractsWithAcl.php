@@ -25,7 +25,23 @@ trait InteractsWithAcl
         $this->syncAclFromConfig();
 
         $user = User::factory()->create($userAttributes);
+        $this->grantPlatformStaffBoundary($user);
         $user->givePermissionTo($permissions);
+
+        return $user;
+    }
+
+    /**
+     * Mark a test actor as platform staff without attaching catalog permissions.
+     *
+     * Production staff always hold `super-admin`, `membership-admin`, or `editor`.
+     * ACL feature tests grant permissions directly; the empty `editor` role is only
+     * the staff-boundary ticket so those tests can still enter `/admin`.
+     */
+    protected function grantPlatformStaffBoundary(User $user): User
+    {
+        Role::findOrCreate('editor', 'web');
+        $user->assignRole('editor');
 
         return $user;
     }

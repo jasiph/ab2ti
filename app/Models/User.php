@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -17,10 +18,11 @@ class User extends Authenticatable
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
+
     use HasProfilePhoto;
+    use HasRoles;
     use Notifiable;
     use TwoFactorAuthenticatable;
-    use HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -67,5 +69,36 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function member(): HasOne
+    {
+        return $this->hasOne(Member::class);
+    }
+
+    public function linkedMember(): ?Member
+    {
+        return $this->member;
+    }
+
+    public function isPlatformStaff(): bool
+    {
+        return $this->hasRole(['super-admin', 'membership-admin', 'editor']);
+    }
+
+    public function ownsLapak(Lapak $lapak): bool
+    {
+        $member = $this->linkedMember();
+
+        return $member !== null
+            && ! $this->isPlatformStaff()
+            && (int) $lapak->member_id === (int) $member->id;
+    }
+
+    public function ownsListing(LapakListing $listing): bool
+    {
+        $listing->loadMissing('lapak');
+
+        return $listing->lapak instanceof Lapak && $this->ownsLapak($listing->lapak);
     }
 }

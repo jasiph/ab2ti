@@ -18,15 +18,11 @@ Priority key:
 
 | Field | Content |
 |---|---|
-| Priority | **DEFERRED** (IA) / becomes **P1** before public URL redesign |
-| Issue | `routes/web.php` maps `/sermons` and `/events` to CMS pages with those slugs. Public nav labels them “Farming Tech” and “News”. Footer still links `/sermons`. |
-| Evidence | `routes/web.php`, `useNavigation.js`, `FooterSection.vue`, `lang/*/sources/menu.json` |
-| Risk | Confusing IA; accidental breakage if renamed without redirects |
-| Recommended phase | After Constitution; with Information Architecture, not during hardening of auth |
-| Decision needed | Keep aliases, add redirects from better URLs, or replace once page slugs exist |
-| Phase 0B | Not changed |
-| Phase 0C-A | Not changed |
-| Phase 0C-B | **DEFERRED TO PHASE 1 INFORMATION ARCHITECTURE.** Not renamed, redirected, or relabeled. Tests still cover `/sermons` and `/events`. |
+| Priority | **RESOLVED** (Phase 2C.1 / ADR 0005) |
+| Issue | `routes/web.php` mapped `/sermons` and `/events` to CMS pages. Public nav labeled them “Farming Tech” and “News”. Footer linked `/sermons`. |
+| Resolution | Explicit aliases removed. First segments `sermons` and `events` reserved so CMS cannot reclaim them. No redirects. Public nav/footer use `/teknologi-tani` and `/publikasi`. |
+| Phase 0C-B | **DEFERRED TO PHASE 1 INFORMATION ARCHITECTURE.** |
+| Phase 2C.1 | Resolved. |
 
 ## 2. `culture.*` / `artikel.*` permissions
 
@@ -181,9 +177,9 @@ These were confirmed in the Architecture Baseline and SHOULD be handled with the
 
 ## Remaining after Phase 0C-B (intentional deferrals)
 
-Foundation hardening 0C-A + 0C-B is complete. Remaining items need Phase 1 product/IA knowledge:
+Foundation remaining items:
 
-1. `/sermons` and `/events` information architecture.
+1. ~~`/sermons` and `/events` information architecture.~~ **Resolved in Phase 2C.1 (ADR 0005).**
 2. `MustVerifyEmail` product decision (feature flag is off; do not implement until decided).
 3. `BaseSearchSelect` / `DashboardStatCard` — wait for a real AB2TI use case.
 4. Optional later: `access settings` unused permission, dotted Inertia auth keys, Jetstream vs Base component duplication, Laravel skeleton README.

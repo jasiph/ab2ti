@@ -5,17 +5,13 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import BaseButton from "@/Components/Base/BaseButton.vue";
 import BasePagination from "@/Components/Base/BasePagination.vue";
 import BaseList from "@/Components/Base/BaseList.vue";
-import BaseCard from "@/Components/Base/BaseCard.vue";
 
 const props = defineProps({
     heroes: Object,
 });
 
 const toggleActive = (hero) => {
-    router.put(route("admin.heroes.update", hero.id), {
-        ...hero,
-        is_active: !hero.is_active,
-    }, {
+    router.patch(route("admin.heroes.toggle", hero.id), {}, {
         preserveScroll: true,
     });
 };

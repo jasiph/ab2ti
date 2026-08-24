@@ -223,6 +223,12 @@ const href = computed(() => {
                                 <DropdownLink :href="route('profile.show')">
                                     {{ $t("Profile") }}
                                 </DropdownLink>
+                                <DropdownLink
+                                    v-if="$page.props.auth.linked_to_member"
+                                    :href="route('account.lapak.index')"
+                                >
+                                    {{ $t("Lapak Saya") }}
+                                </DropdownLink>
                                 <div class="border-t border-border"></div>
                                 <form
                                     @submit.prevent="

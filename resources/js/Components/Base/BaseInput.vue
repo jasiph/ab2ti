@@ -1,5 +1,7 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref, useAttrs } from "vue";
+
+defineOptions({ inheritAttrs: false });
 
 defineProps({
     modelValue: String,
@@ -7,6 +9,7 @@ defineProps({
     type: { type: String, default: "text" },
     error: String,
     placeholder: String,
+    hint: String,
     id: {
         type: String,
         default: () => `input-${Math.random().toString(36).substr(2, 9)}`,
@@ -16,7 +19,15 @@ defineProps({
 
 defineEmits(["update:modelValue"]);
 
+const attrs = useAttrs();
 const input = ref(null);
+
+const wrapperClass = computed(() => attrs.class);
+const controlAttrs = computed(() => {
+    const { class: _ignored, ...rest } = attrs;
+
+    return rest;
+});
 
 onMounted(() => {
     if (input.value.hasAttribute("autofocus")) {
@@ -28,29 +39,38 @@ defineExpose({ focus: () => input.value.focus() });
 </script>
 
 <template>
-    <div class="w-full">
+    <div class="w-full" :class="wrapperClass">
         <label
             v-if="label"
             :for="id"
             class="block font-medium text-sm text-text-main mb-1"
         >
-            {{ label }} <span v-if="required" class="text-red-500">*</span>
+            {{ label }}
+            <span v-if="required" class="text-danger">*</span>
         </label>
 
         <input
             :id="id"
             ref="input"
+            v-bind="controlAttrs"
             :type="type"
             :value="modelValue"
             :placeholder="placeholder"
+            :aria-invalid="error ? 'true' : undefined"
+            :aria-required="required ? 'true' : undefined"
+            :aria-describedby="error ? `${id}-error` : hint ? `${id}-hint` : undefined"
             @input="$emit('update:modelValue', $event.target.value)"
-            class="border-border bg-surface text-text-main focus:border-primary focus:ring-primary rounded-md shadow-sm block w-full transition sm:text-sm placeholder-text-muted/50"
+            class="border-border bg-surface text-text-main focus:border-primary focus:ring-primary rounded-md shadow-sm block w-full min-h-control transition text-base sm:text-sm placeholder-text-muted/50"
             :class="{
-                'border-red-500 focus:border-red-500 focus:ring-red-500': error,
+                'border-danger focus:border-danger focus:ring-danger': error,
             }"
         />
 
-        <p v-if="error" class="text-sm text-red-600 mt-1 animate-pulse">
+        <p v-if="hint && !error" :id="`${id}-hint`" class="text-sm text-text-muted mt-1">
+            {{ hint }}
+        </p>
+
+        <p v-if="error" :id="`${id}-error`" class="text-sm text-danger mt-1" role="alert">
             {{ error }}
         </p>
     </div>

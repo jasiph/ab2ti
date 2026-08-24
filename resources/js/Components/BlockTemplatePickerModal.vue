@@ -1,6 +1,6 @@
 <script setup>
-import { ref, watch } from "vue";
-import Modal from "@/Components/Modal.vue";
+import { computed, ref, watch } from "vue";
+import BaseModal from "@/Components/Base/BaseModal.vue";
 import axios from "axios";
 
 const props = defineProps({
@@ -31,20 +31,22 @@ watch(
         if (newVal && blocks.value.length === 0) {
             fetchBlocks();
         }
-    }
+    },
 );
 
 const filteredBlocks = computed(() => {
-    if (!searchQuery.value) return blocks.value;
+    if (!searchQuery.value) {
+        return blocks.value;
+    }
+
     const lowerQuery = searchQuery.value.toLowerCase();
+
     return blocks.value.filter(
         (b) =>
             b.name.toLowerCase().includes(lowerQuery) ||
-            (b.description && b.description.toLowerCase().includes(lowerQuery))
+            (b.description && b.description.toLowerCase().includes(lowerQuery)),
     );
 });
-
-import { computed } from "vue";
 
 const selectBlock = (block) => {
     emit("select", block);
@@ -53,20 +55,12 @@ const selectBlock = (block) => {
 </script>
 
 <template>
-    <Modal :show="show" @close="$emit('close')" maxWidth="2xl">
-        <div class="bg-white dark:bg-gray-800 rounded-lg overflow-hidden flex flex-col h-[80vh] max-h-[600px]">
+    <BaseModal :show="show" labelled-by="block-picker-title" maxWidth="2xl" @close="$emit('close')">
+        <div class="bg-white dark:bg-gray-800 overflow-hidden flex flex-col h-[80vh] max-h-[600px]">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900">
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <h3 id="block-picker-title" class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     <span class="text-xl">✨</span> Sisipkan Dynamic Block
                 </h3>
-                <button
-                    @click="$emit('close')"
-                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
             </div>
 
             <div class="p-4 flex flex-col flex-1 overflow-hidden">
@@ -115,6 +109,7 @@ const selectBlock = (block) => {
 
             <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-right">
                 <button
+                    type="button"
                     @click="$emit('close')"
                     class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition font-medium"
                 >
@@ -122,5 +117,5 @@ const selectBlock = (block) => {
                 </button>
             </div>
         </div>
-    </Modal>
+    </BaseModal>
 </template>

@@ -1,8 +1,7 @@
 <script setup>
-import { ref, computed } from "vue";
-import { useForm, router } from "@inertiajs/vue3";
+import { ref, watch } from "vue";
+import { router } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
-import BaseCard from "@/Components/Base/BaseCard.vue";
 import BaseButton from "@/Components/Base/BaseButton.vue";
 import BasePagination from "@/Components/Base/BasePagination.vue";
 import FilePreviewModal from "@/Components/FileManager/FilePreviewModal.vue";
@@ -12,12 +11,17 @@ const props = defineProps({
     files: Object,
 });
 
-const search = ref("");
 const showPreview = ref(false);
 const selectedFile = ref(null);
+const localFiles = ref([...(props.files?.data ?? [])]);
 
-// Reactive local copy of the file list
-const localFiles = ref([...props.files.data]);
+watch(
+    () => props.files,
+    (next) => {
+        localFiles.value = [...(next?.data ?? [])];
+    },
+    { deep: true },
+);
 
 const onFileClick = (file) => {
     selectedFile.value = file;
@@ -34,12 +38,14 @@ const onFileDeleted = (fileId) => {
 };
 
 const onFileRestored = (file) => {
-    // Insert back in the correct position (by created_at desc, or just prepend)
-    localFiles.value.unshift(file);
-};
+    if (!file?.id) {
+        return;
+    }
 
-const isImage = (file) => {
-    return file.mime_type?.startsWith("image/");
+    localFiles.value = [
+        file,
+        ...localFiles.value.filter((item) => item.id !== file.id),
+    ];
 };
 </script>
 
@@ -61,11 +67,10 @@ const isImage = (file) => {
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <!-- Grid View -->
                 <FileGrid :files="localFiles" @file-click="onFileClick" />
 
                 <div class="mt-6">
-                     <BasePagination :links="files.links" />
+                    <BasePagination :links="files.links" />
                 </div>
             </div>
         </div>

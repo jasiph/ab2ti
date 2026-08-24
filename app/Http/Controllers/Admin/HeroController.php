@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\File;
 use App\Models\Hero;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,15 +12,12 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class HeroController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $heroes = Hero::with('media')
             ->orderBy('created_at', 'desc')
             ->paginate(10)
-            ->through(function ($hero) {
+            ->through(function (Hero $hero) {
                 return [
                     'id' => $hero->id,
                     'title' => $hero->title,
@@ -34,17 +32,11 @@ class HeroController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return Inertia::render('Admin/Hero/Form');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -68,37 +60,16 @@ class HeroController extends Controller
                 'is_active' => $validated['is_active'] ?? false,
             ]);
 
-            if (! empty($request->file_ids)) {
-                foreach ($request->file_ids as $fileId) {
-                    $file = \App\Models\File::find($fileId);
-                    if ($file) {
-                        $media = $file->getFirstMedia('default');
-                        if ($media) {
-                            $media->copy($hero, 'hero-backgrounds');
-                        }
-                    }
-                }
-            }
+            $this->attachBackgrounds($hero, $request->input('file_ids', []));
         });
 
         return redirect()->route('admin.heroes.index')
             ->with('success', 'Hero created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit(Hero $hero)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        $hero = Hero::with('media')->findOrFail($id);
+        $hero->load('media');
 
         return Inertia::render('Admin/Hero/Form', [
             'hero' => [
@@ -109,7 +80,7 @@ class HeroController extends Controller
                 'button_text' => $hero->button_text,
                 'button_url' => $hero->button_url,
                 'is_active' => $hero->is_active,
-                'images' => $hero->getMedia('hero-backgrounds')->map(function ($media) {
+                'images' => $hero->getMedia('hero-backgrounds')->map(function (Media $media) {
                     return [
                         'id' => $media->id,
                         'url' => $media->getUrl(),
@@ -120,13 +91,8 @@ class HeroController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Hero $hero)
     {
-        $hero = Hero::findOrFail($id);
-
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'primary_text' => 'nullable|string|max:255',
@@ -150,18 +116,7 @@ class HeroController extends Controller
                 'is_active' => $validated['is_active'] ?? false,
             ]);
 
-            // Handle new files
-            if (! empty($request->file_ids)) {
-                foreach ($request->file_ids as $fileId) {
-                    $file = \App\Models\File::find($fileId);
-                    if ($file) {
-                        $media = $file->getFirstMedia('default');
-                        if ($media) {
-                            $media->copy($hero, 'hero-backgrounds');
-                        }
-                    }
-                }
-            }
+            $this->attachBackgrounds($hero, $request->input('file_ids', []));
 
             if (! empty($request->remove_media_ids)) {
                 $hero->media()
@@ -175,15 +130,35 @@ class HeroController extends Controller
             ->with('success', 'Hero updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function toggle(Hero $hero)
     {
-        $hero = Hero::findOrFail($id);
+        $hero->update([
+            'is_active' => ! $hero->is_active,
+        ]);
+
+        return back()->with('success', 'Hero status updated.');
+    }
+
+    public function destroy(Hero $hero)
+    {
         $hero->delete();
 
         return redirect()->route('admin.heroes.index')
             ->with('success', 'Hero deleted successfully.');
+    }
+
+    /**
+     * @param  array<int, mixed>  $fileIds
+     */
+    private function attachBackgrounds(Hero $hero, array $fileIds): void
+    {
+        foreach ($fileIds as $fileId) {
+            $file = File::query()->find($fileId);
+            $media = $file?->getFirstMedia('default');
+
+            if ($media) {
+                $media->copy($hero, 'hero-backgrounds');
+            }
+        }
     }
 }

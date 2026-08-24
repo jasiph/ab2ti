@@ -3,12 +3,15 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\File;
+use App\Models\Member;
 use App\Models\Page;
 use App\Models\User;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Spatie\Permission\Models\Role;
 use Tests\Concerns\InteractsWithAcl;
 use Tests\TestCase;
 
@@ -37,6 +40,11 @@ class AdminAuthorizationTest extends TestCase
             'pages index' => ['get', 'admin.pages.index', []],
             'block templates index' => ['get', 'admin.block-templates.index', []],
             'welcome section edit' => ['get', 'admin.welcome-section.edit', []],
+            'membership applications' => ['get', 'admin.membership.applications.index', []],
+            'membership members' => ['get', 'admin.membership.members.index', []],
+            'lapak storefronts' => ['get', 'admin.lapak.storefronts.index', []],
+            'publishing publications' => ['get', 'admin.publishing.publications.index', []],
+            'knowledge articles' => ['get', 'admin.knowledge.articles.index', []],
         ];
     }
 
@@ -156,6 +164,94 @@ class AdminAuthorizationTest extends TestCase
         $this->assertDatabaseHas('pages', ['id' => $page->id, 'title' => 'Original']);
     }
 
+    public function test_guest_is_redirected_from_admin_shell(): void
+    {
+        $this->get(route('dashboard'))->assertRedirect(route('login'));
+        $this->get(route('admin.dashboard'))->assertRedirect(route('login'));
+    }
+
+    public function test_ordinary_authenticated_user_cannot_enter_admin_shell(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('dashboard'))
+            ->assertForbidden()
+            ->assertInertia(fn ($page) => $page
+                ->component('Errors/Show')
+                ->where('status', 403));
+
+        $this->actingAs($user)
+            ->get(route('admin.dashboard'))
+            ->assertForbidden()
+            ->assertInertia(fn ($page) => $page
+                ->component('Errors/Show')
+                ->where('status', 403));
+    }
+
+    public function test_linked_member_may_use_owner_workspace_but_not_admin_shell(): void
+    {
+        $user = User::factory()->create();
+        Member::factory()->linked($user)->create();
+
+        $this->actingAs($user)
+            ->get(route('account.lapak.index'))
+            ->assertOk();
+
+        $this->actingAs($user)->get(route('dashboard'))->assertForbidden();
+        $this->actingAs($user)->get(route('admin.dashboard'))->assertForbidden();
+    }
+
+    public function test_module_permission_without_staff_role_cannot_enter_admin(): void
+    {
+        $this->syncAclFromConfig();
+        $user = User::factory()->create();
+        $user->givePermissionTo(['users.view', 'media.view', 'lapak.view']);
+
+        $this->actingAs($user)->get(route('dashboard'))->assertForbidden();
+        $this->actingAs($user)->get(route('admin.dashboard'))->assertForbidden();
+        $this->actingAs($user)->get(route('admin.users.index'))->assertForbidden();
+        $this->actingAs($user)->get(route('admin.files.index'))->assertForbidden();
+        $this->actingAs($user)->get(route('admin.lapak.storefronts.index'))->assertForbidden();
+    }
+
+    public function test_editor_may_enter_admin_shell_but_not_unrelated_modules(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $editor = User::factory()->create();
+        $editor->assignRole('editor');
+
+        $this->actingAs($editor)->get(route('dashboard'))->assertOk();
+        $this->actingAs($editor)->get(route('admin.dashboard'))->assertOk();
+        $this->actingAs($editor)->get(route('admin.pages.index'))->assertOk();
+        $this->actingAs($editor)->get(route('admin.membership.applications.index'))->assertForbidden();
+        $this->actingAs($editor)->get(route('admin.lapak.storefronts.index'))->assertForbidden();
+    }
+
+    public function test_membership_admin_may_enter_admin_shell_but_not_unrelated_modules(): void
+    {
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $staff = User::factory()->create();
+        $staff->assignRole('membership-admin');
+
+        $this->actingAs($staff)->get(route('dashboard'))->assertOk();
+        $this->actingAs($staff)->get(route('admin.dashboard'))->assertOk();
+        $this->actingAs($staff)->get(route('admin.membership.members.index'))->assertOk();
+        $this->actingAs($staff)->get(route('admin.lapak.storefronts.index'))->assertOk();
+        $this->actingAs($staff)->get(route('admin.pages.index'))->assertForbidden();
+        $this->actingAs($staff)->get(route('admin.files.index'))->assertForbidden();
+    }
+
+    public function test_super_admin_may_enter_admin_shell(): void
+    {
+        $user = $this->superAdmin();
+
+        $this->actingAs($user)->get(route('dashboard'))->assertOk();
+        $this->actingAs($user)->get(route('admin.dashboard'))->assertOk();
+    }
+
     public function test_super_admin_bypasses_permission_checks(): void
     {
         $user = $this->superAdmin();
@@ -169,12 +265,15 @@ class AdminAuthorizationTest extends TestCase
             ->assertOk();
     }
 
-    public function test_authenticated_user_can_open_dashboard_without_module_permissions(): void
+    public function test_staff_may_open_dashboard_without_module_permissions(): void
     {
-        $user = User::factory()->create();
+        $this->syncAclFromConfig();
+        $editor = User::factory()->create();
+        Role::findOrCreate('editor', 'web');
+        $editor->assignRole('editor');
 
-        $this->actingAs($user)->get(route('dashboard'))->assertOk();
-        $this->actingAs($user)->get(route('admin.dashboard'))->assertOk();
+        $this->actingAs($editor)->get(route('dashboard'))->assertOk();
+        $this->actingAs($editor)->get(route('admin.dashboard'))->assertOk();
     }
 
     public function test_guest_cannot_restore_a_file(): void

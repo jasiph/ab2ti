@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\PublicDelivery\PublicMetadataResolver;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
 
@@ -30,8 +32,14 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $shared = parent::share($request);
+        $auth = is_array($shared['auth'] ?? null) ? $shared['auth'] : [];
+        $auth['linked_to_member'] = $request->user()?->linkedMember() !== null;
+        $auth['can_access_admin'] = $request->user()?->isPlatformStaff() === true;
+
         return [
-            ...parent::share($request),
+            ...$shared,
+            'auth' => $auth,
             // Kirim locale saat ini ke frontend
             'locale' => app()->getLocale(),
             // Definisi Flash Message Global
@@ -53,7 +61,15 @@ class HandleInertiaRequests extends Middleware
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
-            'canRegister' => fn () => \Illuminate\Support\Facades\Route::has('register'),
+            'canRegister' => fn () => Route::has('register'),
+            'organization' => fn () => [
+                'name' => config('organization.name'),
+                'short_name' => config('organization.short_name'),
+                'contact' => config('organization.contact'),
+            ],
+            'seo' => fn () => app(PublicMetadataResolver::class)
+                ->forRequest($request)
+                ->toArray(),
         ];
     }
 }

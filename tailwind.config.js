@@ -67,20 +67,33 @@ export default {
     ],
     theme: {
         extend: {
+            fontFamily: {
+                sans: ["Inter", ...defaultTheme.fontFamily.sans],
+            },
+            fontSize: {
+                caption: ["0.8125rem", { lineHeight: "1.25rem" }],
+            },
+            minHeight: {
+                control: "2.75rem",
+            },
             colors: {
-                // Warna Semantik (AB2TI Agricultural Theme)
                 background: withOpacity("--color-background"),
                 surface: {
                     DEFAULT: withOpacity("--color-surface"),
                     variant: withOpacity("--color-surface-variant"),
+                    muted: withOpacity("--color-surface-variant"),
                 },
                 primary: {
                     DEFAULT: withOpacity("--color-primary"),
                     dark: withOpacity("--color-primary-dark"),
                 },
-                secondary: withOpacity("--color-secondary"), // Gold/Amber
-                accent: withOpacity("--color-accent"),       // Red
-
+                secondary: withOpacity("--color-secondary"),
+                accent: withOpacity("--color-accent"),
+                success: withOpacity("--color-success"),
+                warning: withOpacity("--color-warning"),
+                danger: withOpacity("--color-danger"),
+                info: withOpacity("--color-info"),
+                focus: withOpacity("--color-focus"),
                 text: {
                     main: withOpacity("--color-text-main"),
                     muted: withOpacity("--color-text-muted"),

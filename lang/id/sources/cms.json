@@ -1,0 +1,18 @@
+{
+    "Dynamic Block Templates": "Template Blok Dinamis",
+    "Create New Block": "Buat Blok Baru",
+    "No block templates found": "Belum ada template blok",
+    "Get started by creating a new block template.": "Mulai dengan membuat template blok baru.",
+    "Delete this block template?": "Hapus template blok ini?",
+    "block_templates_info": "Template blok adalah cuplikan HTML yang dapat disisipkan ke editor halaman. Identitas blok (nama) dipertahankan saat disisipkan.",
+    "Currently Active": "Sedang aktif",
+    "Set as Active": "Jadikan aktif",
+    "Select from Library": "Pilih dari pustaka",
+    "Saving...": "Menyimpan...",
+    "Save": "Simpan",
+    "Content": "Konten",
+    "Secondary Content": "Konten sekunder",
+    "Image URL": "URL gambar",
+    "CTA Label": "Label CTA",
+    "CTA URL": "URL CTA"
+}
