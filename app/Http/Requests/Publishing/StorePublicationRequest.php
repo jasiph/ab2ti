@@ -4,6 +4,7 @@ namespace App\Http\Requests\Publishing;
 
 use App\Enums\PublicationType;
 use App\Support\Publishing\PublicationSlug;
+use App\Support\Publishing\YouTubeVideo;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -24,7 +25,11 @@ class StorePublicationRequest extends FormRequest
             $slug = PublicationSlug::unique($slug);
         }
 
-        $this->merge(['slug' => $slug]);
+        $this->merge([
+            'slug' => $slug,
+            'youtube_url' => YouTubeVideo::normalizeInput($this->input('youtube_url')),
+            'is_cooperative_update' => $this->boolean('is_cooperative_update'),
+        ]);
     }
 
     /**
@@ -40,6 +45,8 @@ class StorePublicationRequest extends FormRequest
             'content' => ['nullable', 'string'],
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string', 'max:320'],
+            'youtube_url' => YouTubeVideo::rules(),
+            'is_cooperative_update' => ['sometimes', 'boolean'],
             'existing_cover_asset_id' => ['nullable', 'integer', 'exists:files,id'],
             'remove_cover' => ['sometimes', 'boolean'],
             'existing_social_asset_id' => ['nullable', 'integer', 'exists:files,id'],

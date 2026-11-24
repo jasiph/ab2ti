@@ -7,12 +7,14 @@ import BaseCard from "@/Components/Base/BaseCard.vue";
 import BaseInput from "@/Components/Base/BaseInput.vue";
 import BaseTextarea from "@/Components/Base/BaseTextarea.vue";
 import MembershipStatusBadge from "@/Components/Membership/MembershipStatusBadge.vue";
+import CooperativeBadge from "@/Components/Cooperative/CooperativeBadge.vue";
 
 const props = defineProps({
     member: Object,
     canUpdate: Boolean,
     canIssueAccountLink: Boolean,
     canViewSourceApplication: Boolean,
+    canManageCooperative: Boolean,
     accountLinkInvitationUrl: {
         type: String,
         default: null,
@@ -97,7 +99,10 @@ const copyInvitation = async () => {
                         <span class="font-mono">{{ member.membership_number }}</span>
                     </p>
                 </div>
-                <MembershipStatusBadge :status="member.status" />
+                <div class="flex flex-wrap gap-2">
+                    <MembershipStatusBadge :status="member.status" />
+                    <CooperativeBadge :state="member.cooperative?.state || 'none'" />
+                </div>
             </div>
         </template>
 
@@ -121,6 +126,35 @@ const copyInvitation = async () => {
                         <dd class="mt-1">{{ member.created_by_name || "—" }}</dd>
                     </div>
                 </dl>
+            </BaseCard>
+
+
+            <BaseCard>
+                <template #header>{{ $t("Cooperative membership") }}</template>
+                <p class="text-sm text-text-muted mb-4">
+                    {{ $t("Cooperative membership is optional") }}
+                </p>
+                <p class="text-sm text-text-main">
+                    <template v-if="member.cooperative?.state === 'active'">{{ $t("Active") }}</template>
+                    <template v-else-if="member.cooperative?.state === 'inactive'">{{ $t("Inactive") }}</template>
+                    <template v-else>{{ $t("Not a Cooperative member") }}</template>
+                </p>
+                <div v-if="canManageCooperative" class="mt-4">
+                    <BaseButton
+                        v-if="member.cooperative?.id"
+                        :href="route('admin.cooperative.memberships.show', member.cooperative.id)"
+                        variant="secondary"
+                    >
+                        {{ $t("Open Cooperative membership") }}
+                    </BaseButton>
+                    <BaseButton
+                        v-else
+                        :href="route('admin.cooperative.memberships.create')"
+                        variant="secondary"
+                    >
+                        {{ $t("Establish Cooperative membership") }}
+                    </BaseButton>
+                </div>
             </BaseCard>
 
             <BaseCard>

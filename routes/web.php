@@ -5,6 +5,11 @@ use App\Http\Controllers\Account\MemberAccountLinkController;
 use App\Http\Controllers\Account\OwnerLapakController;
 use App\Http\Controllers\Account\OwnerLapakListingController;
 use App\Http\Controllers\Admin\BlockTemplateController;
+use App\Http\Controllers\Admin\CooperativeDashboardController;
+use App\Http\Controllers\Admin\CooperativeImportController;
+use App\Http\Controllers\Admin\CooperativeImportReconciliationController;
+use App\Http\Controllers\Admin\CooperativeMembershipController;
+use App\Http\Controllers\Admin\CooperativePsnController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FileManagerController;
 use App\Http\Controllers\Admin\HeroController;
@@ -20,6 +25,7 @@ use App\Http\Controllers\Admin\PublicationController as AdminPublicationControll
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WelcomeSectionController;
+use App\Http\Controllers\Cooperative\PublicCooperativeController;
 use App\Http\Controllers\Knowledge\PublicKnowledgeController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\Lapak\PublicLapakController;
@@ -57,6 +63,8 @@ Route::post('/keanggotaan/daftar', [PublicMembershipController::class, 'store'])
     ->name('membership.apply.store');
 Route::get('/keanggotaan/daftar/terkirim', [PublicMembershipController::class, 'submitted'])
     ->name('membership.apply.submitted');
+
+Route::get('/koperasi', [PublicCooperativeController::class, 'index'])->name('cooperative.index');
 
 Route::middleware(ApplyCapabilitySecurityHeaders::class)->group(function () {
     Route::get('/akses/revisi/terkirim', [MembershipRevisionController::class, 'submitted'])
@@ -355,6 +363,72 @@ Route::middleware($authenticateStaff)
                 ->name('lapak.listings.show');
             Route::get('lapak/categories', [LapakCategoryController::class, 'index'])
                 ->name('lapak.categories.index');
+        });
+
+        Route::middleware('permission:cooperative.manage')->group(function () {
+            Route::get('koperasi/anggota/create', [CooperativeMembershipController::class, 'create'])
+                ->name('cooperative.memberships.create');
+            Route::post('koperasi/anggota', [CooperativeMembershipController::class, 'store'])
+                ->name('cooperative.memberships.store');
+            Route::get('koperasi/anggota/{membership}/edit', [CooperativeMembershipController::class, 'edit'])
+                ->whereNumber('membership')
+                ->name('cooperative.memberships.edit');
+            Route::patch('koperasi/anggota/{membership}', [CooperativeMembershipController::class, 'update'])
+                ->whereNumber('membership')
+                ->name('cooperative.memberships.update');
+            Route::get('koperasi/anggota/{membership}/psn/kelola', [CooperativeMembershipController::class, 'editPsn'])
+                ->whereNumber('membership')
+                ->name('cooperative.memberships.psn.edit');
+            Route::post('koperasi/anggota/{membership}/psn/adjust', [CooperativeMembershipController::class, 'adjustPsn'])
+                ->whereNumber('membership')
+                ->name('cooperative.memberships.psn.adjust');
+            Route::post('koperasi/import', [CooperativeImportController::class, 'store'])
+                ->name('cooperative.imports.store');
+            Route::post('koperasi/import/{batch}/worksheet', [CooperativeImportController::class, 'selectWorksheet'])
+                ->whereNumber('batch')
+                ->name('cooperative.imports.selectWorksheet');
+            Route::post('koperasi/import/{batch}/commit', [CooperativeImportController::class, 'commit'])
+                ->whereNumber('batch')
+                ->name('cooperative.imports.commit');
+            Route::post('koperasi/import/{batch}/reverse', [CooperativeImportController::class, 'reverse'])
+                ->whereNumber('batch')
+                ->name('cooperative.imports.reverse');
+            Route::post('koperasi/import/{batch}/rows/{row}/match', [CooperativeImportController::class, 'match'])
+                ->whereNumber('batch')
+                ->whereNumber('row')
+                ->name('cooperative.imports.match');
+            Route::post('koperasi/import/{batch}/reconciliation/items/{item}/resolve', [CooperativeImportReconciliationController::class, 'resolveItem'])
+                ->whereNumber('batch')
+                ->whereNumber('item')
+                ->name('cooperative.imports.reconciliation.resolveItem');
+            Route::post('koperasi/import/{batch}/reconciliation/psn/{row}/resolve', [CooperativeImportReconciliationController::class, 'resolvePsn'])
+                ->whereNumber('batch')
+                ->whereNumber('row')
+                ->name('cooperative.imports.reconciliation.resolvePsn');
+        });
+        Route::middleware('permission:cooperative.view')->group(function () {
+            Route::get('koperasi', [CooperativeDashboardController::class, 'index'])
+                ->name('cooperative.dashboard');
+            Route::get('koperasi/anggota', [CooperativeMembershipController::class, 'index'])
+                ->name('cooperative.memberships.index');
+            Route::get('koperasi/anggota/{membership}', [CooperativeMembershipController::class, 'show'])
+                ->whereNumber('membership')
+                ->name('cooperative.memberships.show');
+            Route::get('koperasi/psn', [CooperativePsnController::class, 'index'])
+                ->name('cooperative.psn.index');
+            Route::get('koperasi/psn/{participation}', [CooperativePsnController::class, 'show'])
+                ->whereNumber('participation')
+                ->name('cooperative.psn.show');
+            Route::get('koperasi/import', [CooperativeImportController::class, 'index'])
+                ->name('cooperative.imports.index');
+            Route::get('koperasi/import/members', [CooperativeImportController::class, 'members'])
+                ->name('cooperative.imports.members');
+            Route::get('koperasi/import/{batch}', [CooperativeImportController::class, 'show'])
+                ->whereNumber('batch')
+                ->name('cooperative.imports.show');
+            Route::get('koperasi/import/{batch}/reconciliation', [CooperativeImportReconciliationController::class, 'index'])
+                ->whereNumber('batch')
+                ->name('cooperative.imports.reconciliation.index');
         });
 
         Route::middleware('permission:knowledge-articles.create')->group(function () {

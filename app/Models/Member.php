@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\MemberSourceType;
 use App\Enums\MemberStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,9 +16,10 @@ class Member extends Model
 
     /**
      * Contact snapshot fields only. Identity keys (membership_number,
-     * source_application_id, status, recognized_at, created_by) and the
-     * deferred card_issued flag are written by named Actions, not HTTP
-     * mass assignment.
+     * source_application_id, source_type, status, recognized_at, created_by)
+     * and the deferred card_issued flag are written by named Actions, not HTTP
+     * mass assignment. Members are created only through an approved membership
+     * workflow or an authorized Cooperative legacy import.
      */
     protected $fillable = [
         'legal_name',
@@ -30,6 +32,7 @@ class Member extends Model
     {
         return [
             'status' => MemberStatus::class,
+            'source_type' => MemberSourceType::class,
             'recognized_at' => 'datetime',
             'linked_at' => 'datetime',
             'card_issued' => 'boolean',
@@ -57,8 +60,18 @@ class Member extends Model
         return $this->hasOne(Lapak::class);
     }
 
+    public function cooperativeMembership(): HasOne
+    {
+        return $this->hasOne(CooperativeMembership::class);
+    }
+
     public function isLinkedToAccount(): bool
     {
         return $this->user_id !== null;
+    }
+
+    public function isActiveCooperativeMember(): bool
+    {
+        return $this->cooperativeMembership?->isActive() === true;
     }
 }

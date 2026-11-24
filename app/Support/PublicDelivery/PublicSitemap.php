@@ -59,6 +59,7 @@ final class PublicSitemap
         $this->push($entries, '/teknologi-tani');
         $this->push($entries, '/lapak');
         $this->push($entries, '/keanggotaan');
+        $this->push($entries, '/koperasi');
 
         Page::query()
             ->where('is_active', true)

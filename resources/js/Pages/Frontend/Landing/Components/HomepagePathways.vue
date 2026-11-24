@@ -30,6 +30,11 @@ const pathways = [
         bodyKey: "Pathway membership help",
         routeName: "membership.index",
     },
+    {
+        titleKey: "Cooperative",
+        bodyKey: "Pathway cooperative help",
+        routeName: "cooperative.index",
+    },
 ];
 </script>
 

@@ -12,6 +12,7 @@
         "laravel/jetstream": "^5.4",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
+        "openspout/openspout": "^4.28",
         "spatie/laravel-medialibrary": "^11.19",
         "spatie/laravel-permission": "^6.24",
         "symfony/intl": "^8.0",

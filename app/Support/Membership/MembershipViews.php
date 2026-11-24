@@ -8,6 +8,7 @@ use App\Models\MembershipApplication;
 use App\Models\MembershipApplicationTransition;
 use App\Models\MembershipDocument;
 use App\Models\User;
+use App\Support\Cooperative\CooperativeViews;
 
 final class MembershipViews
 {
@@ -117,6 +118,7 @@ final class MembershipViews
             'email' => $member->email,
             'status' => $member->status->value,
             'recognized_at' => $member->recognized_at?->toIso8601String(),
+            'cooperative_badge' => $member->isActiveCooperativeMember(),
         ];
     }
 
@@ -125,7 +127,7 @@ final class MembershipViews
      */
     public static function memberSummary(Member $member): array
     {
-        $member->loadMissing(['sourceApplication', 'creator']);
+        $member->loadMissing(['sourceApplication', 'creator', 'cooperativeMembership']);
 
         return [
             'id' => $member->id,
@@ -138,6 +140,7 @@ final class MembershipViews
             'recognized_at' => $member->recognized_at?->toIso8601String(),
             'created_by_name' => $member->creator?->name,
             'account_link' => AccountLinkStatus::for($member),
+            'cooperative' => CooperativeViews::badgeForMember($member),
             'source_application' => $member->sourceApplication === null ? null : [
                 'id' => $member->sourceApplication->id,
                 'reference_code' => $member->sourceApplication->reference_code,

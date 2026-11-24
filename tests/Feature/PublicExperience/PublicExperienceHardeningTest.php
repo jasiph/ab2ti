@@ -120,6 +120,7 @@ class PublicExperienceHardeningTest extends TestCase
         $this->assertStringContainsString('<loc>https://ab2ti.test/teknologi-tani</loc>', $xml);
         $this->assertStringContainsString('<loc>https://ab2ti.test/lapak</loc>', $xml);
         $this->assertStringContainsString('<loc>https://ab2ti.test/keanggotaan</loc>', $xml);
+        $this->assertStringContainsString('<loc>https://ab2ti.test/koperasi</loc>', $xml);
         $this->assertStringContainsString('<loc>https://ab2ti.test/about</loc>', $xml);
         $this->assertStringContainsString('<loc>https://ab2ti.test/'.$publishedPublication->publicPath().'</loc>', $xml);
         $this->assertStringContainsString('<loc>https://ab2ti.test/'.$publishedArticle->publicPath().'</loc>', $xml);

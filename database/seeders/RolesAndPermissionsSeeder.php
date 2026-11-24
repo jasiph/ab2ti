@@ -48,6 +48,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'lapak.view',
             'lapak.manage',
             'lapak.moderate',
+            'cooperative.view',
+            'cooperative.manage',
         ]);
 
         $editorRole = Role::firstOrCreate(['name' => 'editor']);

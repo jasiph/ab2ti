@@ -46,5 +46,10 @@
     "Unpublish publication": "Batalkan terbit publikasi",
     "Unpublish publication confirmation": "Publikasi akan kembali menjadi draf dan tidak tampil di situs publik. Tanggal terbit terakhir tetap disimpan.",
     "Delete publication": "Hapus publikasi",
-    "Delete publication confirmation": "Draf ini akan dihapus. Publikasi yang sudah terbit harus dibatalkan terbitannya terlebih dahulu."
+    "Delete publication confirmation": "Draf ini akan dihapus. Publikasi yang sudah terbit harus dibatalkan terbitannya terlebih dahulu.",
+    "YouTube video": "Video YouTube",
+    "YouTube video help": "Opsional. Tempel URL video YouTube yang akan ditampilkan pada halaman publikasi.",
+    "The YouTube URL is invalid.": "URL YouTube tidak valid.",
+    "Show as Cooperative update": "Tampilkan sebagai update Koperasi",
+    "Show as Cooperative update help": "Jika sudah terbit, naskah ini dapat muncul di update terbaru pada landing Koperasi. Ini tidak mengubah jenis publikasi dan tidak membuat draf menjadi publik."
 }

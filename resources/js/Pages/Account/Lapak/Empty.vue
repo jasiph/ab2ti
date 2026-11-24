@@ -3,9 +3,11 @@ import { Link } from "@inertiajs/vue3";
 import FrontendLayout from "@/Layouts/FrontendLayout.vue";
 import BaseButton from "@/Components/Base/BaseButton.vue";
 import BaseCard from "@/Components/Base/BaseCard.vue";
+import CooperativeWorkspaceCard from "@/Components/Cooperative/CooperativeWorkspaceCard.vue";
 
 defineProps({
     member: { type: Object, required: true },
+    cooperative: { type: Object, default: () => ({ state: "none" }) },
 });
 </script>
 
@@ -16,6 +18,8 @@ defineProps({
                 <p class="text-sm text-text-muted">{{ member.legal_name }} · {{ member.membership_number }}</p>
                 <h1 class="mt-1 text-2xl sm:text-3xl font-bold text-text-main">Lapak Saya</h1>
             </div>
+
+            <CooperativeWorkspaceCard :cooperative="cooperative" />
 
             <BaseCard>
                 <template #header>Belum ada Lapak</template>

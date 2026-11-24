@@ -46,5 +46,10 @@
     "Unpublish publication": "Unpublish publication",
     "Unpublish publication confirmation": "The publication will return to draft and leave the public site. The last publication date is kept.",
     "Delete publication": "Delete publication",
-    "Delete publication confirmation": "This draft will be deleted. A published publication must be unpublished first."
+    "Delete publication confirmation": "This draft will be deleted. A published publication must be unpublished first.",
+    "YouTube video": "YouTube video",
+    "YouTube video help": "Optional. Paste the YouTube video URL to display on the publication page.",
+    "The YouTube URL is invalid.": "The YouTube URL is invalid.",
+    "Show as Cooperative update": "Show as a Cooperative update",
+    "Show as Cooperative update help": "When published, this item can appear among latest updates on the Cooperative landing. It does not change the publication type or make drafts public."
 }

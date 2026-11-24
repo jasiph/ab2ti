@@ -13,6 +13,7 @@ use App\Http\Requests\Lapak\OwnerStoreLapakRequest;
 use App\Http\Requests\Lapak\OwnerUpdateLapakRequest;
 use App\Models\Lapak;
 use App\Models\Member;
+use App\Support\Cooperative\CooperativeViews;
 use App\Support\Lapak\LapakViews;
 use App\Support\PublicDelivery\PublicMetadataResolver;
 use Illuminate\Http\RedirectResponse;
@@ -35,15 +36,19 @@ class OwnerLapakController extends Controller
         $lapak = $member->lapak;
 
         if ($lapak === null) {
+            $member->loadMissing('cooperativeMembership');
+
             return Inertia::render('Account/Lapak/Empty', [
                 'member' => [
                     'legal_name' => $member->legal_name,
                     'membership_number' => $member->membership_number,
                 ],
+                'cooperative' => CooperativeViews::workspaceStatus($member),
                 'seo' => $this->seo($request, $metadata, 'Buat Lapak Saya'),
             ]);
         }
 
+        $member->loadMissing('cooperativeMembership');
         $lapak->load('listings');
 
         return Inertia::render('Account/Lapak/Overview', [
@@ -51,6 +56,7 @@ class OwnerLapakController extends Controller
                 'legal_name' => $member->legal_name,
                 'membership_number' => $member->membership_number,
             ],
+            'cooperative' => CooperativeViews::workspaceStatus($member),
             'lapak' => LapakViews::ownerStorefront($lapak),
             'listing_counts' => [
                 'total' => $lapak->listings->count(),

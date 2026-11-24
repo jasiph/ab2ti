@@ -47,6 +47,8 @@ const form = useForm({
     content: props.publication?.content || "",
     meta_title: props.publication?.meta_title || "",
     meta_description: props.publication?.meta_description || "",
+    youtube_url: props.publication?.youtube_url || "",
+    is_cooperative_update: !!props.publication?.is_cooperative_update,
     new_cover: null,
     existing_cover_asset_id: null,
     remove_cover: false,
@@ -295,6 +297,29 @@ const destroy = async () => {
                         </BaseButton>
                     </div>
                     <p v-if="isCompressing" class="text-sm text-text-muted">{{ $t("Compressing image") }}</p>
+                    <BaseInput
+                        id="publication-youtube-url"
+                        v-model="form.youtube_url"
+                        :label="$t('YouTube video')"
+                        :hint="$t('YouTube video help')"
+                        :error="form.errors.youtube_url"
+                    />
+                    <label class="flex items-start gap-3 cursor-pointer">
+                        <input
+                            id="publication-is-cooperative-update"
+                            v-model="form.is_cooperative_update"
+                            type="checkbox"
+                            class="mt-1 rounded border-border text-primary focus:ring-primary"
+                        />
+                        <span>
+                            <span class="block text-sm font-medium text-text-main">
+                                {{ $t("Show as Cooperative update") }}
+                            </span>
+                            <span class="block text-sm text-text-muted">
+                                {{ $t("Show as Cooperative update help") }}
+                            </span>
+                        </span>
+                    </label>
                 </div>
             </BaseCard>
 

@@ -35,6 +35,8 @@ return [
 
         'keanggotaan' => 'Association membership public family (informational landing + intake).',
 
+        'koperasi' => 'Koperasi Pusat AB2TI public landing (/koperasi).',
+
         'akses' => 'Secure Capability Access redeem and loginless purpose workspace (/akses/*).',
 
         'anggota' => 'Reserved so CMS cannot occupy the legacy membership URL family.',

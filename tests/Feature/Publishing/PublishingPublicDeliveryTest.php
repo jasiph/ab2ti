@@ -52,7 +52,8 @@ class PublishingPublicDeliveryTest extends TestCase
                 ->missing('publication.created_by')
                 ->missing('publication.updated_by')
                 ->missing('publication.status')
-                ->missing('publication.meta_title'))
+                ->missing('publication.meta_title')
+                ->where('publication.youtube', null))
             ->getContent();
 
         $this->assertSame('https://ab2ti.test/berita/panen-benih', $this->linkHref($html, 'canonical'));

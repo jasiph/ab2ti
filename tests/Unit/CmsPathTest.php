@@ -29,6 +29,8 @@ class CmsPathTest extends TestCase
         $this->assertTrue(CmsPath::isReserved('liputan-media'));
         $this->assertTrue(CmsPath::isReserved('teknologi-tani'));
         $this->assertTrue(CmsPath::isReserved('teknologi-tani/contoh'));
+        $this->assertTrue(CmsPath::isReserved('koperasi'));
+        $this->assertTrue(CmsPath::isReserved('koperasi/info'));
         $this->assertTrue(CmsPath::isReserved('lapak'));
         $this->assertTrue(CmsPath::isReserved('lapak/contoh'));
         $this->assertTrue(CmsPath::isReserved('akun'));

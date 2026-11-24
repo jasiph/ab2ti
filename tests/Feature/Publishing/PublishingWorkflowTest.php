@@ -42,6 +42,7 @@ class PublishingWorkflowTest extends TestCase
         $this->assertSame($staff->id, $publication->created_by);
         $this->assertSame($staff->id, $publication->updated_by);
         $this->assertSame('<p>Isi berita.</p>', $publication->content);
+        $this->assertNull($publication->youtube_url);
     }
 
     public function test_draft_can_be_updated_without_changing_status(): void

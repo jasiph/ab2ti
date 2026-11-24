@@ -1,0 +1,5 @@
+Nama,NIK,Email,Telepon,Simpanan Pokok,Simpanan Sukarela,Total,No. Saham,Tanggal,Ket,Keterangan
+Sari Utami,3174010101900001,sari.utami@example.test,081234567890,1.000.000,49.000.000,50.000.000,32-1-000181 (50),26/09/2023,USM,Pembayaran tunai fiktif
+Anton Setiawan,3174010101910002,anton.setiawan@example.test,081234567891,,,1.000.000,33-000231,26/09/2023,Online,
+Darto Prakoso,3174010101920003,darto.prakoso@example.test,081234567892,,,1.000.000,33-000232,26-27/09/2023,Puput,
+Dukut Raharjo,3174010101930004,dukut.raharjo@example.test,081234567893,1.000.000,1.000.000,2.000.000,33-000233 (2),26/09/2023,,

@@ -2,6 +2,7 @@
 
 namespace App\Actions\Membership;
 
+use App\Enums\MemberSourceType;
 use App\Enums\MemberStatus;
 use App\Models\Member;
 use App\Models\MembershipApplication;
@@ -26,6 +27,7 @@ class CreateAb2tiMemberFromApplication
         $member = new Member;
         $member->membership_number = MembershipNumberGenerator::generate();
         $member->source_application_id = $application->id;
+        $member->source_type = MemberSourceType::MembershipApplication;
         $member->status = MemberStatus::Active;
         $member->legal_name = $application->legal_name;
         $member->email = $application->email;

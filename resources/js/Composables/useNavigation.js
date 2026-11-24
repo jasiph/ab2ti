@@ -188,6 +188,45 @@ export function useNavigation() {
                 ],
             },
 
+            {
+                label: trans("Cooperative"),
+                permission: ["cooperative.view"],
+                active: route().current("admin.cooperative.*"),
+                icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4",
+                children: [
+                    {
+                        label: trans("Cooperative dashboard"),
+                        route: "admin.cooperative.dashboard",
+                        permission: "cooperative.view",
+                        active: route().current("admin.cooperative.dashboard"),
+                    },
+                    {
+                        label: trans("Cooperative members"),
+                        route: "admin.cooperative.memberships.index",
+                        permission: "cooperative.view",
+                        active: route().current("admin.cooperative.memberships.*"),
+                    },
+                    {
+                        label: trans("PSN"),
+                        route: "admin.cooperative.psn.index",
+                        permission: "cooperative.view",
+                        active: route().current("admin.cooperative.psn.*"),
+                    },
+                    {
+                        label: trans("Perlu Validasi"),
+                        route: "admin.cooperative.imports.index",
+                        permission: "cooperative.view",
+                        active: route().current("admin.cooperative.imports.reconciliation.*"),
+                    },
+                    {
+                        label: trans("Legacy Cooperative import"),
+                        route: "admin.cooperative.imports.index",
+                        permission: "cooperative.view",
+                        active: route().current("admin.cooperative.imports.index") || route().current("admin.cooperative.imports.show") || route().current("admin.cooperative.imports.store"),
+                    },
+                ],
+            },
+
             // 4. SETTINGS (System Settings)
             {
                 label: trans("System Settings"),
@@ -251,6 +290,11 @@ export function useNavigation() {
             label: "Membership",
             route: "membership.index",
             active: route().current("membership.*"),
+        },
+        {
+            label: "Cooperative",
+            route: "cooperative.index",
+            active: route().current("cooperative.*"),
         },
         {
             label: "Contact",

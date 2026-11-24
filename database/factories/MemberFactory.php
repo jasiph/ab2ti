@@ -21,6 +21,7 @@ class MemberFactory extends Factory
         return [
             'membership_number' => MembershipNumberGenerator::generate(),
             'source_application_id' => MembershipApplication::factory()->approved(),
+            'source_type' => \App\Enums\MemberSourceType::MembershipApplication,
             'status' => MemberStatus::Active,
             'legal_name' => fake()->name(),
             'email' => fake()->safeEmail(),

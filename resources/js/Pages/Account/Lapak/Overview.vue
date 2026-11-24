@@ -3,12 +3,14 @@ import { Link, router } from "@inertiajs/vue3";
 import FrontendLayout from "@/Layouts/FrontendLayout.vue";
 import BaseButton from "@/Components/Base/BaseButton.vue";
 import BaseCard from "@/Components/Base/BaseCard.vue";
+import CooperativeWorkspaceCard from "@/Components/Cooperative/CooperativeWorkspaceCard.vue";
 
 const props = defineProps({
     member: { type: Object, required: true },
     lapak: { type: Object, required: true },
     listing_counts: { type: Object, required: true },
     listings: { type: Array, default: () => [] },
+    cooperative: { type: Object, default: () => ({ state: "none" }) },
 });
 
 const submitLapak = () => {
@@ -54,6 +56,8 @@ const submitLapak = () => {
                     </BaseButton>
                 </div>
             </div>
+
+            <CooperativeWorkspaceCard :cooperative="cooperative" />
 
             <BaseCard>
                 <template #header>Status Lapak</template>

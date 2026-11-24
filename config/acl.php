@@ -89,5 +89,11 @@ return [
             'lapak.manage',
             'lapak.moderate',
         ],
+
+        // Group: Koperasi Pusat AB2TI membership registry (not PSN ledger)
+        'cooperative' => [
+            'cooperative.view',
+            'cooperative.manage',
+        ],
     ],
 ];

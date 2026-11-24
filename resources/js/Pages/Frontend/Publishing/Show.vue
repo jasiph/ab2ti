@@ -75,6 +75,21 @@ const formatDate = (value) => {
                     />
                 </figure>
 
+                <div
+                    v-if="publication.youtube?.embed_url"
+                    class="mt-8 w-full overflow-hidden rounded-xl border border-border bg-black aspect-video"
+                >
+                    <iframe
+                        class="h-full w-full"
+                        :src="publication.youtube.embed_url"
+                        :title="`${$t('YouTube video')}: ${publication.title}`"
+                        loading="lazy"
+                        allowfullscreen
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin"
+                    />
+                </div>
+
                 <EditorialBody class="mt-8" :html="publication.content" />
 
                 <p class="mt-10">

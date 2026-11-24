@@ -95,6 +95,8 @@ class PublicationController extends Controller
                 'content' => $content->normalize($validated['content'] ?? null),
                 'meta_title' => $validated['meta_title'] ?? null,
                 'meta_description' => $validated['meta_description'] ?? null,
+                'youtube_url' => $validated['youtube_url'] ?? null,
+                'is_cooperative_update' => (bool) ($validated['is_cooperative_update'] ?? false),
             ]);
             $publication->status = PublicationStatus::Draft;
             $publication->created_by = $request->user()->id;
@@ -158,6 +160,8 @@ class PublicationController extends Controller
                 'content' => $content->normalize($validated['content'] ?? null),
                 'meta_title' => $validated['meta_title'] ?? null,
                 'meta_description' => $validated['meta_description'] ?? null,
+                'youtube_url' => $validated['youtube_url'] ?? null,
+                'is_cooperative_update' => (bool) ($validated['is_cooperative_update'] ?? false),
             ]);
             $publication->updated_by = $request->user()->id;
             $publication->save();

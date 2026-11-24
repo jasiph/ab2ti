@@ -164,7 +164,7 @@ Theme tokens live in `resources/css/app.css` and `tailwind.config.js`: brand `pr
 
 Jetstream leftovers (`PrimaryButton`, `SecondaryButton`, `DangerButton`, `Modal`, `DialogModal`, `ConfirmationModal`) remain on Fortify/profile. **Do not use them on new domain screens.** Canonical confirm: `ConfirmDialog` + `useConfirm`.
 
-Public nav: `NavLink` uses brand tokens (not Jetstream indigo). Public destinations are a single named-route contract in `useNavigation().frontendMenus` (navbar, mobile `BaseModal`, footer): Beranda → Tentang AB2TI → Publikasi → Teknologi Tani → Lapak Anggota → Keanggotaan → Kontak. Labels are i18n keys; templates translate once. The primary navbar is site navigation only. Theme, language, and authorized Dashboard/Admin access live in the existing public top-bar utility cluster (`PublicTopbarUtilities`). Membership application is a contextual CTA on `/keanggotaan` and the homepage invite, not a global navbar button. Desktop nav yields to the mobile menu below the `xl` (1280px) breakpoint. Koperasi and Community are not listed.
+Public nav: `NavLink` uses brand tokens (not Jetstream indigo). Public destinations are a single named-route contract in `useNavigation().frontendMenus` (navbar, mobile `BaseModal`, footer): Beranda → Tentang AB2TI → Publikasi → Teknologi Tani → Lapak Anggota → Keanggotaan → Koperasi → Kontak. Labels are i18n keys; templates translate once. The primary navbar is site navigation only. Theme, language, and authorized Dashboard/Admin access live in the existing public top-bar utility cluster (`PublicTopbarUtilities`). Membership application is a contextual CTA on `/keanggotaan` and the homepage invite, not a global navbar button. Desktop nav yields to the mobile menu below the `xl` (1280px) breakpoint. Community is not listed.
 
 Public layout rhythm: `PublicContainer` / `PublicSection` / `SectionHeading`. Homepage composition is `WelcomeController` (not a route closure). Secretariat contact is `config/organization.php` (Phase 1A address/phone/fax/email/WhatsApp). No invented social URLs.
 
@@ -342,7 +342,7 @@ This is not a second membership system. It hardens the Phase 2A domain so User �
 |---|---|
 | Aggregates | `MembershipApplication` (intake) and `Member` (AB2TI Member). No Applicant table. Account link (`members.user_id`) is not created by approval. Staff later grant site access; see Member site-access provisioning |
 | Lifecycle | `MembershipApplicationLifecycle` + enum allow-list; invalid transitions rejected. Phase 3C resubmit is `revision_requested → submitted` |
-| Member creation | Only `ApproveMembershipApplication` → `CreateAb2tiMemberFromApplication` |
+| Member creation | `ApproveMembershipApplication` → `CreateAb2tiMemberFromApplication`, **or** authorized Cooperative legacy import commit → `BootstrapLegacyMember`. No general admin Create Member. No User is created by either path. |
 | Identifiers | Opaque unique `reference_code` and technical unique `membership_number`; not sequential IDs; card format still open |
 | Secure Capability | Purpose name `membership-application-revision`; platform table implemented in Phase 3C |
 | Koperasi | Not in this context |
@@ -700,3 +700,28 @@ BACKUP    operator-owned; required before migrate --force
 | Rehearsal | Isolated SQLite: 24 migrations, `acl:sync` 40, production seeder, `ab2ti:provision-operator`, Laravel caches |
 | Queue / cron | None required |
 | Content | `/about` and `/contact` remain CMS-backed; 404 until published |
+
+
+---
+
+## Cooperative (post-RC required scope)
+
+Recorded 2026-08-24. Koperasi Pusat AB2TI membership is now required before the **final production RC**. Historical tag `ab2ti-2.0-rc` (commit `0037d7ce7451b57d805afa04a2ee064e8e326fb5`) remains a **pre-Cooperative** baseline and must not be moved, rewritten, or retargeted. Phases 4 / 5A / 5B stay closed historical records; they are not rewritten as if K1 existed at that snapshot.
+
+Current K1 reality: `Member` 1—0..1 `CooperativeMembership`; staff registry under `/admin/koperasi/anggota`; public `/koperasi`; Badge Koperasi derived from active Cooperative membership; Cooperative updates reuse `Publication.is_cooperative_update`.
+
+K2 (2026-08-26): canonical `CooperativeBusiness` PSN; `BusinessParticipation` + `ParticipationEntry` ledger (current units = sum of entries); historical `CooperativeFundEntry` openings only (not a live savings product); staged Excel/CSV import (`openspout/openspout`) with preview, conservative Member matching, and auditable commit. Public `/koperasi` exposes `total_psn_shares` and `psn_participants` as aggregates. Real legacy data is not imported by K2. Details: `docs/implementation/phase-k2-psn-legacy-cooperative-import.md`. Operator runbook: `docs/operations/cooperative-legacy-import.md`. Savings/loan and online share purchase remain out of scope.
+
+K2H (2026-08-26): hardening only — financial invariants, additive unique indexes, import state/idempotency/lock-safe commit, reversal safety, private disk + encrypted staging JSON, parser/header/file-limit hardening, no double-counting copy. Real Cooperative spreadsheet still not imported. Isolated MySQL migrate + focused import tests passed. Details: `docs/implementation/phase-k2h-psn-import-hardening.md`.
+
+K2H compatibility hotfix (2026-08-26): multi-sheet workbooks are inspected rather than rejected. Operators select one worksheet; hidden sheets are not imported implicitly; header detection scans the first 20 rows; footer/summary rows are not staged as members; import identity is worksheet-aware (`file_hash` + `worksheet_name`); non-integral legacy totals become row-level NEEDS REVIEW without failing the batch. Canonical commit of real Cooperative data remains unauthorized.
+
+Trusted legacy Member bootstrap hotfix (2026-08-26): Cooperative legacy import may create a canonical `Member` at **approved commit** when no existing Member matches, via `BootstrapLegacyMember` only. Contact/profile gaps are warnings. Component-level readiness/commit separates Member, CooperativeMembership, historical funds, and PSN. Unresolved shares do not erase membership. Public `/koperasi` hides total AB2TI counts and PSN headline aggregates while registry/PSN reconciliation flags remain false. Real workbook dry-run may stage rows; canonical commit of real data remains unauthorized. Details: `docs/implementation/hotfix-cooperative-legacy-member-bootstrap.md`.
+
+Import modes (2026-08-26): default **append**; optional **replace_legacy** checkbox on commit (never preselected) with explicit acknowledgement. Replace cleans provenance-scoped legacy-import Cooperative/PSN artifacts only, marks prior batches `replaced`, preserves source-internal duplicate rows as warned Members, and never truncates application tables or deletes Users/MembershipApplications/non-legacy Members.
+
+Trusted membership classification hotfix (2026-08-26): missing email/phone/address no longer invalidates historical membership for the authorized Cooperative source. Source-internal duplicate audit uses staging NIK/identifier/email/phone. Component timestamps track partial commits. Additive migration `2026_08_26_180000_allow_legacy_member_profile_gaps.php` nullifies Member contact fields and adds import component timestamps.
+
+K3 (2026-08-27): staff Cooperative workspace at `/admin/koperasi` — dashboard, searchable member list, unified Member detail, desired-total PSN adjustment via signed `ParticipationEntry`. ACL remains `cooperative.view` / `cooperative.manage`. Details: `docs/implementation/phase-k3-cooperative-admin-operations.md`.
+
+K3H (2026-09-11): operational hardening of that workspace — default read-only Member detail, two-step PSN confirmation, `expected_current_units` stale rejection, `lockForUpdate` + ledger SUM, confirmation-token idempotency, integer/no-op/negative-position guards, reduction review, Asia/Jakarta effective dates with no future dating, unit-value snapshot, compensating corrections (`correction_of` in provenance, not `reverses_entry_id`), unresolved-PSN and inactive-membership gates, dashboard recorded-value labeling, activity-type privacy. Additive unique `confirmation_token` on `participation_entries`. Details: `docs/implementation/phase-k3h-cooperative-admin-hardening.md`. Operator notes: `docs/operations/cooperative-admin-psn-adjustments.md`.

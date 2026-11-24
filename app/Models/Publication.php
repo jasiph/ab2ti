@@ -28,6 +28,8 @@ class Publication extends Model implements HasMedia
         'content',
         'meta_title',
         'meta_description',
+        'youtube_url',
+        'is_cooperative_update',
     ];
 
     protected function casts(): array
@@ -36,6 +38,7 @@ class Publication extends Model implements HasMedia
             'type' => PublicationType::class,
             'status' => PublicationStatus::class,
             'published_at' => 'datetime',
+            'is_cooperative_update' => 'boolean',
         ];
     }
 
@@ -52,6 +55,11 @@ class Publication extends Model implements HasMedia
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('status', PublicationStatus::Published);
+    }
+
+    public function scopeCooperativeUpdates(Builder $query): Builder
+    {
+        return $query->where('is_cooperative_update', true);
     }
 
     public function isPublished(): bool

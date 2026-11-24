@@ -9,6 +9,7 @@ use App\Exceptions\MemberAccountLinkException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Membership\IssueMemberSiteAccessRequest;
 use App\Http\Requests\Membership\UpdateMemberRequest;
+use App\Models\CooperativeMembership;
 use App\Models\Member;
 use App\Support\Membership\MembershipViews;
 use App\Support\PublicDelivery\PublicMetadataResolver;
@@ -26,6 +27,7 @@ class MemberController extends Controller
         $search = $request->string('search')->toString();
 
         $members = Member::query()
+            ->with('cooperativeMembership')
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
                     $inner->where('legal_name', 'like', '%'.$search.'%')
@@ -61,6 +63,7 @@ class MemberController extends Controller
             'canIssueAccountLink' => $request->user()->can('update', $member),
             'accountLinkInvitationUrl' => $request->session()->get('member_account_link_url'),
             'canViewSourceApplication' => $request->user()->can('membership-applications.view'),
+            'canManageCooperative' => $request->user()->can('create', CooperativeMembership::class),
             'seo' => $metadata->forTransactionalPage(
                 $request->path(),
                 'Detail anggota AB2TI',

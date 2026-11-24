@@ -7,6 +7,7 @@ import BasePagination from "@/Components/Base/BasePagination.vue";
 import BaseButton from "@/Components/Base/BaseButton.vue";
 import BaseInput from "@/Components/Base/BaseInput.vue";
 import MembershipStatusBadge from "@/Components/Membership/MembershipStatusBadge.vue";
+import CooperativeBadge from "@/Components/Cooperative/CooperativeBadge.vue";
 
 const props = defineProps({
     members: Object,
@@ -69,11 +70,17 @@ const formatDate = (value) => {
             </template>
 
             <template #meta_mobile="{ item }">
-                <MembershipStatusBadge :status="item.status" />
+                <span class="inline-flex flex-wrap gap-2">
+                    <MembershipStatusBadge :status="item.status" />
+                    <CooperativeBadge v-if="item.cooperative_badge" state="active" />
+                </span>
             </template>
 
             <template #right="{ item }">
-                <MembershipStatusBadge :status="item.status" />
+                <span class="inline-flex flex-wrap gap-2">
+                    <MembershipStatusBadge :status="item.status" />
+                    <CooperativeBadge v-if="item.cooperative_badge" state="active" />
+                </span>
                 <span class="text-xs text-text-muted">{{ formatDate(item.recognized_at) }}</span>
                 <Link
                     :href="route('admin.membership.members.show', item.id)"

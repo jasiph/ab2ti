@@ -49,6 +49,7 @@ final class PublicationViews
             'published_at' => $publication->published_at?->toIso8601String(),
             'cover_url' => $cover?->getUrl(),
             'cover_alt' => $publication->title,
+            'youtube' => YouTubeVideo::publicPayload($publication->youtube_url),
         ];
     }
 
@@ -87,6 +88,8 @@ final class PublicationViews
             'published_at' => $publication->published_at?->toIso8601String(),
             'meta_title' => $publication->meta_title,
             'meta_description' => $publication->meta_description,
+            'youtube_url' => $publication->youtube_url,
+            'is_cooperative_update' => (bool) $publication->is_cooperative_update,
             'cover_url' => $cover ? $resolver->urlFromMedia($cover) : null,
             'social_image_url' => $og ? $resolver->urlFromMedia($og) : null,
             'public_url' => $publication->isPublished() ? '/'.$publication->publicPath() : null,

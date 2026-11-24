@@ -167,6 +167,19 @@ class CmsRoutingTest extends TestCase
             ->assertSessionHasErrors('slug');
     }
 
+    public function test_koperasi_cannot_become_a_cms_page(): void
+    {
+        $user = $this->userWithPermissions(['cms.create']);
+
+        $this->actingAs($user)
+            ->post(route('admin.pages.store'), [
+                'title' => 'Koperasi CMS',
+                'slug' => 'koperasi',
+                'is_active' => true,
+            ])
+            ->assertSessionHasErrors('slug');
+    }
+
     public function test_akses_cannot_become_a_cms_page(): void
     {
         $user = $this->userWithPermissions(['cms.create']);

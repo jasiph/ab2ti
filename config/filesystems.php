@@ -45,6 +45,14 @@ return [
             'report' => false,
         ],
 
+        'cooperative_imports' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/cooperative-imports'),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
